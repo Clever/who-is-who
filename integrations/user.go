@@ -1,7 +1,6 @@
 package integrations
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 
@@ -22,15 +21,19 @@ const (
 )
 
 var (
-	EmailIndex         = Index{"", "email"}
+	// EmailIndex is used for querying Dynamo for a user based on their email. This is also
+	// the primary index for Dynamo.
+	EmailIndex = Index{"", "email"}
+	// FreeTierThroughput is the maximum throughput that we can use for Dynamo without
+	// entering the paid tier.
 	FreeTierThroughput = schema.ProvisionedThroughput{
-		// These are the free tier limits
 		ReadCapacityUnits:  25,
 		WriteCapacityUnits: 25,
 	}
-	GlobalSecondaryIndexes = []schema.SecondaryIndex{}
 )
 
+// Index represents the information needed to query Dynamo on a Global Secondary index
+// for a certain field.
 type Index struct {
 	Index string
 	Field string
@@ -46,6 +49,7 @@ type User struct {
 	AWS       string `json:"aws"`        // first initial + last name
 }
 
+// ToDynago converts a User object into a dynago.Document object.
 func (u User) ToDynago() dynago.Document {
 	return dynago.Document{
 		emailKey:     u.Email,
@@ -57,6 +61,7 @@ func (u User) ToDynago() dynago.Document {
 	}
 }
 
+// UserFromDynago builds a user object from a dynago.Document.
 func UserFromDynago(doc dynago.Document) User {
 	return User{
 		Email:     doc.GetString(emailKey),
@@ -81,6 +86,7 @@ type InfoSource interface {
 	Fill(UserMap) UserMap
 }
 
+// SaveUsers performs batch writes to add all users to Dynamo.
 func (c Client) SaveUsers(l UserMap) error {
 	dynagoObjects := make([]dynago.Document, len(l))
 	var i int
@@ -89,7 +95,9 @@ func (c Client) SaveUsers(l UserMap) error {
 		i++
 	}
 
+	// do a batch write to Dynamo for every 25 users
 	for i := 0; i < len(dynagoObjects)/batchLimit+1; i++ {
+		// properly figure out the indexes on the array
 		firstIndex := i * batchLimit
 		lastIndex := (i + 1) * batchLimit
 		if firstIndex >= len(dynagoObjects) {
@@ -98,12 +106,11 @@ func (c Client) SaveUsers(l UserMap) error {
 			lastIndex = len(dynagoObjects)
 		}
 
+		// perform write and check for unprocessed items
 		res, err := c.Dynamo.BatchWrite().Put(userTable, dynagoObjects[firstIndex:lastIndex]...).Execute()
 		if err != nil {
 			return fmt.Errorf("Error while executing batch write: %s", err)
-		}
-		failedPuts := res.UnprocessedItems.GetPuts(userTable)
-		if len(failedPuts) > 0 {
+		} else if failedPuts := res.UnprocessedItems.GetPuts(userTable); len(failedPuts) > 0 {
 			for _, fp := range failedPuts {
 				log.Printf("Failed to store: {%#v}", fp)
 			}
@@ -113,11 +120,12 @@ func (c Client) SaveUsers(l UserMap) error {
 	return nil
 }
 
+// GetUser crafts a query for a single user based on the specified index and user information.
 func (c Client) GetUser(idx Index, value string) (User, error) {
 	res, err := c.Dynamo.
 		Query(userTable).
 		IndexName(idx.Index).
-		KeyConditionExpression(fmt.Sprintf("%s = :username", idx.Field), dynago.Param{":username", value}).
+		KeyConditionExpression(fmt.Sprintf("%s = :username", idx.Field), dynago.Param{Key: ":username", Value: value}).
 		Execute()
 
 	if err != nil {
@@ -129,6 +137,7 @@ func (c Client) GetUser(idx Index, value string) (User, error) {
 	return UserFromDynago(res.Items[0]), nil
 }
 
+// GetUserList returns all users.
 func (c Client) GetUserList() ([]User, error) {
 	res, err := c.Dynamo.Scan(userTable).Execute()
 	if err != nil {
@@ -143,21 +152,10 @@ func (c Client) GetUserList() ([]User, error) {
 	return users, nil
 }
 
-func (c Client) GetUserListJSON() ([]byte, error) {
-	res, err := c.Dynamo.Scan(userTable).Execute()
-	if err != nil {
-		return []byte{}, fmt.Errorf("Failed to scan table, %s", err)
-	}
-
-	return json.Marshal(res.Items)
-}
-
-func NewClient(endpoint, accessKey, secretKey string) (Client, error) {
-	executor := dynago.NewAwsExecutor(endpoint, "us-west-1", accessKey, secretKey)
+// NewClient creates a conection to DynamoDB, then creates the
+func NewClient(endpoint, region, accessKey, secretKey string) (Client, error) {
+	executor := dynago.NewAwsExecutor(endpoint, region, accessKey, secretKey)
 	client := dynago.NewClient(executor)
-
-	// TODO, remove when schema is stable
-	client.DeleteTable(userTable)
 
 	// DescribeTable 400's if table DNE
 	_, err := client.DescribeTable(userTable)
@@ -173,8 +171,25 @@ func NewClient(endpoint, accessKey, secretKey string) (Client, error) {
 				{emailKey, schema.HashKey},
 				{slackKey, schema.RangeKey},
 			},
-			ProvisionedThroughput:  FreeTierThroughput,
-			GlobalSecondaryIndexes: GlobalSecondaryIndexes,
+			ProvisionedThroughput: FreeTierThroughput,
+			GlobalSecondaryIndexes: []schema.SecondaryIndex{
+				schema.SecondaryIndex{
+					IndexName: awsKey,
+					KeySchema: []schema.KeySchema{
+						{awsKey, schema.HashKey},
+					},
+					Projection:            schema.Projection{ProjectionType: schema.ProjectAll},
+					ProvisionedThroughput: FreeTierThroughput,
+				},
+				schema.SecondaryIndex{
+					IndexName: slackKey,
+					KeySchema: []schema.KeySchema{
+						{slackKey, schema.HashKey},
+					},
+					Projection:            schema.Projection{ProjectionType: schema.ProjectAll},
+					ProvisionedThroughput: FreeTierThroughput,
+				},
+			},
 		})
 		if err != nil {
 			return Client{}, fmt.Errorf("Failed to create table, %s", err)
@@ -186,6 +201,7 @@ func NewClient(endpoint, accessKey, secretKey string) (Client, error) {
 	}, nil
 }
 
+// Client wraps the Dynago DynamoDB client.
 type Client struct {
 	Dynamo *dynago.Client
 }

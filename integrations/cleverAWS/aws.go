@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/Clever/who-is-who/integrations"
-	"github.com/underarmour/dynago/schema"
 )
 
 const (
@@ -12,20 +11,13 @@ const (
 )
 
 var (
-	Index       = integrations.Index{"aws", "aws"}
-	DynamoIndex = schema.SecondaryIndex{
-		IndexName: Index.Index,
-		KeySchema: []schema.KeySchema{
-			{key, schema.HashKey},
-		},
-		Projection:            schema.Projection{ProjectionType: schema.ProjectAll},
-		ProvisionedThroughput: integrations.FreeTierThroughput,
+	// Index specifies the data for querying with the Global secondary index created for
+	// queries on AWS usernames.
+	Index = integrations.Index{
+		Index: "aws",
+		Field: "aws",
 	}
 )
-
-func init() {
-	integrations.GlobalSecondaryIndexes = append(integrations.GlobalSecondaryIndexes, DynamoIndex)
-}
 
 // AwsService does the computation to form AWS usernames with a first initial and last name.
 type AwsService struct{}

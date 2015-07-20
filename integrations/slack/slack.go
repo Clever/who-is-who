@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/Clever/who-is-who/integrations"
-	"github.com/underarmour/dynago/schema"
 )
 
 const (
@@ -17,20 +16,13 @@ const (
 )
 
 var (
-	Index       = integrations.Index{"slack", "slack"}
-	DynamoIndex = schema.SecondaryIndex{
-		IndexName: Index.Index,
-		KeySchema: []schema.KeySchema{
-			{key, schema.HashKey},
-		},
-		Projection:            schema.Projection{ProjectionType: schema.ProjectAll},
-		ProvisionedThroughput: integrations.FreeTierThroughput,
+	// Index specifies the data for querying with the Global secondary index created for
+	// queries on slack usernames.
+	Index = integrations.Index{
+		Index: "slack",
+		Field: "slack",
 	}
 )
-
-func init() {
-	integrations.GlobalSecondaryIndexes = append(integrations.GlobalSecondaryIndexes, DynamoIndex)
-}
 
 // UserMap contains all users given by Slack in an API call. The key to the map is
 // the email address.
