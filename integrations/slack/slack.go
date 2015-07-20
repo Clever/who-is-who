@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/Clever/who-is-who/integrations"
 )
@@ -15,13 +16,16 @@ const (
 
 // UserMap contains all users given by Slack in an API call. The key to the map is
 // the email address.
-type UserMap map[string]Member
+type UserMap struct {
+	Members map[string]Member
+	Domain  string
+}
 
 // Init calls the Slack API and fills the map with all users.
 // It is an idempotent method.
 func (sul UserMap) Init(token string) error {
 	// short circuit for repeated Init() calls
-	if len(sul) > 0 {
+	if len(sul.Members) > 0 {
 		return nil
 	}
 
@@ -45,8 +49,8 @@ func (sul UserMap) Init(token string) error {
 
 	// fill map with all real users' info
 	for _, u := range l.Members {
-		if !u.IsBot && !u.Deleted {
-			sul[u.Profile.Email] = u
+		if u.Profile.Email != "" && u.Name != "" && !u.IsBot && !u.Deleted && strings.Contains(u.Profile.Email, sul.Domain) {
+			sul.Members[strings.ToLower(u.Profile.Email)] = u
 		}
 	}
 
@@ -57,9 +61,9 @@ func (sul UserMap) Init(token string) error {
 // This is [Email, SlackHandle, Names and Phone].
 func (sul UserMap) Fill(m integrations.UserMap) integrations.UserMap {
 	for email, user := range m {
-		member, exists := sul[email]
+		member, exists := sul.Members[email]
 		if exists {
-			user.Email = member.Profile.Email
+			user.Email = strings.ToLower(member.Profile.Email)
 			user.Slack = member.Name
 			user.FirstName = member.Profile.FirstName
 			user.LastName = member.Profile.LastName

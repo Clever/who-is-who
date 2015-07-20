@@ -1,5 +1,26 @@
 package integrations
 
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+
+	"github.com/underarmour/dynago"
+	"github.com/underarmour/dynago/schema"
+)
+
+const (
+	userTable  = "users"
+	batchLimit = 25
+
+	emailKey     = "email"
+	firstNameKey = "first_name"
+	lastNameKey  = "last_name"
+	slackKey     = "slack"
+	phoneKey     = "phone"
+	awsKey       = "aws"
+)
+
 // User represents the data collected and served by who's who
 type User struct {
 	FirstName string `json:"first_name"` // Slack
@@ -7,8 +28,29 @@ type User struct {
 	Email     string `json:"email"`      // Slack
 	Slack     string `json:"slack"`      // Slack
 	Phone     string `json:"phone"`      // Slack
-	Github    string `json:"github"`     // Github
 	AWS       string `json:"aws"`        // first initial + last name
+}
+
+func (u User) ToDynago() dynago.Document {
+	return dynago.Document{
+		emailKey:     u.Email,
+		slackKey:     u.Slack,
+		firstNameKey: u.FirstName,
+		lastNameKey:  u.LastName,
+		phoneKey:     u.Phone,
+		awsKey:       u.AWS,
+	}
+}
+
+func UserFromDynago(doc dynago.Document) User {
+	return User{
+		Email:     doc.GetString(emailKey),
+		FirstName: doc.GetString(firstNameKey),
+		LastName:  doc.GetString(lastNameKey),
+		Slack:     doc.GetString(slackKey),
+		Phone:     doc.GetString(phoneKey),
+		AWS:       doc.GetString(awsKey),
+	}
 }
 
 // UserMap is used to flesh out the User objects with data from additional services.
@@ -22,4 +64,96 @@ type InfoSource interface {
 	// Fill adds this data source's attributes of the user. It is expected that a user may
 	// not have information in every InfoSource.
 	Fill(UserMap) UserMap
+}
+
+func (c Client) SaveUsers(l UserMap) error {
+	dynagoObjects := make([]dynago.Document, len(l))
+	var i int
+	for _, u := range l {
+		dynagoObjects[i] = u.ToDynago()
+		i++
+	}
+
+	for i := 0; i < len(dynagoObjects)/batchLimit+1; i++ {
+		firstIndex := i * batchLimit
+		lastIndex := (i + 1) * batchLimit
+		if firstIndex >= len(dynagoObjects) {
+			break
+		} else if lastIndex > len(dynagoObjects) {
+			lastIndex = len(dynagoObjects)
+		}
+
+		res, err := c.Dynamo.BatchWrite().Put(userTable, dynagoObjects[firstIndex:lastIndex]...).Execute()
+		if err != nil {
+			return fmt.Errorf("Error while executing batch write: %s", err)
+		}
+		failedPuts := res.UnprocessedItems.GetPuts(userTable)
+		if len(failedPuts) > 0 {
+			for _, fp := range failedPuts {
+				log.Printf("Failed to store: {%#v}", fp)
+			}
+		}
+	}
+
+	return nil
+}
+
+func (c Client) GetUserList() ([]User, error) {
+	res, err := c.Dynamo.Scan(userTable).Execute()
+	if err != nil {
+		return []User{}, fmt.Errorf("Failed to scan table, %s", err)
+	}
+
+	users := make([]User, len(res.Items))
+	for i, d := range res.Items {
+		users[i] = UserFromDynago(d)
+	}
+
+	return users, nil
+}
+
+func (c Client) GetUserListJSON() ([]byte, error) {
+	res, err := c.Dynamo.Scan(userTable).Execute()
+	if err != nil {
+		return []byte{}, fmt.Errorf("Failed to scan table, %s", err)
+	}
+
+	return json.Marshal(res.Items)
+}
+
+func NewClient(endpoint, accessKey, secretKey string) (Client, error) {
+	executor := dynago.NewAwsExecutor(endpoint, "us-west-1", accessKey, secretKey)
+	client := dynago.NewClient(executor)
+
+	// DescribeTable 400's if table DNE
+	_, err := client.DescribeTable(userTable)
+	if err != nil {
+		_, err := client.CreateTable(&schema.CreateRequest{
+			TableName: userTable,
+			AttributeDefinitions: []schema.AttributeDefinition{
+				{emailKey, schema.String},
+				{slackKey, schema.String},
+			},
+			KeySchema: []schema.KeySchema{
+				{emailKey, schema.HashKey},
+				{slackKey, schema.RangeKey},
+			},
+			ProvisionedThroughput: schema.ProvisionedThroughput{
+				// These are the free tier limits
+				ReadCapacityUnits:  25,
+				WriteCapacityUnits: 25,
+			},
+		})
+		if err != nil {
+			return Client{}, fmt.Errorf("Failed to create table, %s", err)
+		}
+	}
+
+	return Client{
+		Dynamo: client,
+	}, nil
+}
+
+type Client struct {
+	Dynamo *dynago.Client
 }
