@@ -21,6 +21,21 @@ const (
 	awsKey       = "aws"
 )
 
+var (
+	EmailIndex         = Index{"", "email"}
+	FreeTierThroughput = schema.ProvisionedThroughput{
+		// These are the free tier limits
+		ReadCapacityUnits:  25,
+		WriteCapacityUnits: 25,
+	}
+	GlobalSecondaryIndexes = []schema.SecondaryIndex{}
+)
+
+type Index struct {
+	Index string
+	Field string
+}
+
 // User represents the data collected and served by who's who
 type User struct {
 	FirstName string `json:"first_name"` // Slack
@@ -98,6 +113,22 @@ func (c Client) SaveUsers(l UserMap) error {
 	return nil
 }
 
+func (c Client) GetUser(idx Index, value string) (User, error) {
+	res, err := c.Dynamo.
+		Query(userTable).
+		IndexName(idx.Index).
+		KeyConditionExpression(fmt.Sprintf("%s = :username", idx.Field), dynago.Param{":username", value}).
+		Execute()
+
+	if err != nil {
+		return User{}, fmt.Errorf("Failed to make query with '%s'=='%s' due to: %s", idx.Field, value, err)
+	} else if res.Count == 0 {
+		return User{}, fmt.Errorf("Failed to find user with '%s'=='%s'", idx.Field, value)
+	}
+
+	return UserFromDynago(res.Items[0]), nil
+}
+
 func (c Client) GetUserList() ([]User, error) {
 	res, err := c.Dynamo.Scan(userTable).Execute()
 	if err != nil {
@@ -125,6 +156,9 @@ func NewClient(endpoint, accessKey, secretKey string) (Client, error) {
 	executor := dynago.NewAwsExecutor(endpoint, "us-west-1", accessKey, secretKey)
 	client := dynago.NewClient(executor)
 
+	// TODO, remove when schema is stable
+	client.DeleteTable(userTable)
+
 	// DescribeTable 400's if table DNE
 	_, err := client.DescribeTable(userTable)
 	if err != nil {
@@ -133,16 +167,14 @@ func NewClient(endpoint, accessKey, secretKey string) (Client, error) {
 			AttributeDefinitions: []schema.AttributeDefinition{
 				{emailKey, schema.String},
 				{slackKey, schema.String},
+				{awsKey, schema.String},
 			},
 			KeySchema: []schema.KeySchema{
 				{emailKey, schema.HashKey},
 				{slackKey, schema.RangeKey},
 			},
-			ProvisionedThroughput: schema.ProvisionedThroughput{
-				// These are the free tier limits
-				ReadCapacityUnits:  25,
-				WriteCapacityUnits: 25,
-			},
+			ProvisionedThroughput:  FreeTierThroughput,
+			GlobalSecondaryIndexes: GlobalSecondaryIndexes,
 		})
 		if err != nil {
 			return Client{}, fmt.Errorf("Failed to create table, %s", err)

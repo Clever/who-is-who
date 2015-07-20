@@ -26,16 +26,25 @@ func init() {
 }
 
 func main() {
+	// get DB conn
+	client, err := integrations.NewClient("http://localhost:8000", "", "")
+	if err != nil {
+		log.Fatalf("Failed to connect => {%s}", err)
+	}
+
 	// get Slack info
-	slackData := make(slack.UserMap)
-	err := slackData.Init(slackToken)
+	slackData := slack.UserMap{
+		Domain:  "clever.com",
+		Members: make(map[string]slack.Member),
+	}
+	err = slackData.Init(slackToken)
 	if err != nil {
 		log.Fatalf("Failed to initialize Slack user list => {%s}", err)
 	}
 
 	// seed a map of User's with emails
 	userMap := make(map[string]integrations.User)
-	for _, m := range slackData {
+	for _, m := range slackData.Members {
 		userMap[strings.ToLower(m.Profile.Email)] = integrations.User{}
 	}
 
