@@ -1,6 +1,7 @@
 package integrations
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
@@ -9,7 +10,6 @@ import (
 )
 
 const (
-	userTable  = "users"
 	batchLimit = 25
 
 	emailKey     = "email"
@@ -30,6 +30,9 @@ var (
 		ReadCapacityUnits:  25,
 		WriteCapacityUnits: 25,
 	}
+	// ErrUserDNE represents the case when a query executes properly but the user is
+	// not found in the database.
+	ErrUserDNE = errors.New("User not found")
 )
 
 // Index represents the information needed to query Dynamo on a Global Secondary index
@@ -107,10 +110,10 @@ func (c Client) SaveUsers(l UserMap) error {
 		}
 
 		// perform write and check for unprocessed items
-		res, err := c.Dynamo.BatchWrite().Put(userTable, dynagoObjects[firstIndex:lastIndex]...).Execute()
+		res, err := c.Dynamo.BatchWrite().Put(c.Table, dynagoObjects[firstIndex:lastIndex]...).Execute()
 		if err != nil {
 			return fmt.Errorf("Error while executing batch write: %s", err)
-		} else if failedPuts := res.UnprocessedItems.GetPuts(userTable); len(failedPuts) > 0 {
+		} else if failedPuts := res.UnprocessedItems.GetPuts(c.Table); len(failedPuts) > 0 {
 			for _, fp := range failedPuts {
 				log.Printf("Failed to store: {%#v}", fp)
 			}
@@ -123,7 +126,7 @@ func (c Client) SaveUsers(l UserMap) error {
 // GetUser crafts a query for a single user based on the specified index and user information.
 func (c Client) GetUser(idx Index, value string) (User, error) {
 	res, err := c.Dynamo.
-		Query(userTable).
+		Query(c.Table).
 		IndexName(idx.Index).
 		KeyConditionExpression(fmt.Sprintf("%s = :username", idx.Field), dynago.Param{Key: ":username", Value: value}).
 		Execute()
@@ -131,7 +134,7 @@ func (c Client) GetUser(idx Index, value string) (User, error) {
 	if err != nil {
 		return User{}, fmt.Errorf("Failed to make query with '%s'=='%s' due to: %s", idx.Field, value, err)
 	} else if res.Count == 0 {
-		return User{}, fmt.Errorf("Failed to find user with '%s'=='%s'", idx.Field, value)
+		return User{}, ErrUserDNE
 	}
 
 	return UserFromDynago(res.Items[0]), nil
@@ -139,7 +142,7 @@ func (c Client) GetUser(idx Index, value string) (User, error) {
 
 // GetUserList returns all users.
 func (c Client) GetUserList() ([]User, error) {
-	res, err := c.Dynamo.Scan(userTable).Execute()
+	res, err := c.Dynamo.Scan(c.Table).Execute()
 	if err != nil {
 		return []User{}, fmt.Errorf("Failed to scan table, %s", err)
 	}
@@ -153,15 +156,15 @@ func (c Client) GetUserList() ([]User, error) {
 }
 
 // NewClient creates a conection to DynamoDB, then creates the
-func NewClient(endpoint, region, accessKey, secretKey string) (Client, error) {
+func NewClient(table, endpoint, region, accessKey, secretKey string) (Client, error) {
 	executor := dynago.NewAwsExecutor(endpoint, region, accessKey, secretKey)
 	client := dynago.NewClient(executor)
 
 	// DescribeTable 400's if table DNE
-	_, err := client.DescribeTable(userTable)
+	_, err := client.DescribeTable(table)
 	if err != nil {
 		_, err := client.CreateTable(&schema.CreateRequest{
-			TableName: userTable,
+			TableName: table,
 			AttributeDefinitions: []schema.AttributeDefinition{
 				{emailKey, schema.String},
 				{slackKey, schema.String},
@@ -198,10 +201,12 @@ func NewClient(endpoint, region, accessKey, secretKey string) (Client, error) {
 
 	return Client{
 		Dynamo: client,
+		Table:  table,
 	}, nil
 }
 
 // Client wraps the Dynago DynamoDB client.
 type Client struct {
 	Dynamo *dynago.Client
+	Table  string
 }
