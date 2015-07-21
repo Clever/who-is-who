@@ -2,3 +2,4 @@ service-account.json
 *.json
 *.pem
 who-is-who
+updater
