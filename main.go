@@ -38,7 +38,7 @@ func requiredEnv(key string) string {
 	return value
 }
 
-func init() {
+func setupEnvVars() {
 	port = requiredEnv("PORT")
 	awsKey = requiredEnv("AWS_ACCESS_KEY")
 	awsSecret = requiredEnv("AWS_SECRET_KEY")
@@ -112,7 +112,19 @@ func (d dynamoConn) aliasEndpoint(idx integrations.Index, key string) func(w htt
 	}
 }
 
+// hookUpRouter sets up the router
+func hookUpRouter(d dynamoConn) *mux.Router {
+	r := mux.NewRouter()
+	r.HandleFunc("/list", d.listEndpoint)
+	r.HandleFunc("/alias/aws/{username}", d.aliasEndpoint(cleveraws.Index, "username"))
+	r.HandleFunc("/alias/slack/{username}", d.aliasEndpoint(slack.Index, "username"))
+	r.HandleFunc("/alias/email/{email}", d.aliasEndpoint(integrations.EmailIndex, "email"))
+	return r
+}
+
 func main() {
+	setupEnvVars()
+
 	// setup dynamodb connection
 	c, err := integrations.NewClient(dynamoTable, dynamoEndpoint, dynamoRegion, awsKey, awsSecret)
 	if err != nil {
@@ -124,16 +136,9 @@ func main() {
 		Dynamo: c,
 	}
 
-	// setup router & routes
-	r := mux.NewRouter()
-	r.HandleFunc("/list", d.listEndpoint)
-	r.HandleFunc("/alias/aws/{username}", d.aliasEndpoint(cleveraws.Index, "username"))
-	r.HandleFunc("/alias/slack/{username}", d.aliasEndpoint(slack.Index, "username"))
-	r.HandleFunc("/alias/email/{email}", d.aliasEndpoint(integrations.EmailIndex, "email"))
-
 	// setup HTTP server
 	log.Println(kayvee.FormatLog("who-is-who", kayvee.Info, "server startup", m{
 		"message": fmt.Sprintf("Listening on %s", port),
 	}))
-	http.ListenAndServe(port, r)
+	http.ListenAndServe(port, hookUpRouter(d))
 }
