@@ -64,7 +64,7 @@ func teardown(c integrations.Client) {
 func TestMain(m *testing.M) {
 	c, err := integrations.NewClient(testTable, testDynamoEndpoint, "", "", "")
 	if err != nil {
-		log.Fatalf("Failed to connect to dynamoDB. Please run the local instance.")
+		log.Fatal(kayvee.FormatLog("who-is-who-testing", kayvee.Critical, "dynamo conn error", nil))
 	}
 	router = hookUpRouter(dynamoConn{
 		Dynamo: c,

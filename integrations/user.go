@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/Clever/kayvee-go"
 	"github.com/underarmour/dynago"
 	"github.com/underarmour/dynago/schema"
 )
@@ -114,9 +115,10 @@ func (c Client) SaveUsers(l UserMap) error {
 		if err != nil {
 			return fmt.Errorf("Error while executing batch write: %s", err)
 		} else if failedPuts := res.UnprocessedItems.GetPuts(c.Table); len(failedPuts) > 0 {
-			for _, fp := range failedPuts {
-				log.Printf("Failed to store: {%#v}", fp)
-			}
+			log.Println(kayvee.FormatLog("who-is-who", kayvee.Error, "batchWrite fails", map[string]interface{}{
+				"num":    len(failedPuts),
+				"values": failedPuts,
+			}))
 		}
 	}
 
