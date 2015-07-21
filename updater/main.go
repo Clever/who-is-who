@@ -5,10 +5,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Clever/kayvee-go"
 	"github.com/Clever/who-is-who/integrations"
 	aws "github.com/Clever/who-is-who/integrations/cleverAWS"
 	"github.com/Clever/who-is-who/integrations/slack"
+	"gopkg.in/clever/kayvee-go.v2"
 )
 
 var (

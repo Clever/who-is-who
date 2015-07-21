@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Clever/kayvee-go"
 	"github.com/underarmour/dynago"
 	"github.com/underarmour/dynago/schema"
+	"gopkg.in/clever/kayvee-go.v2"
 )
 
 const (
