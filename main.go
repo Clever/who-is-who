@@ -117,7 +117,7 @@ func hookUpRouter(d dynamoConn) *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/list", d.listEndpoint)
 	r.HandleFunc("/alias/aws/{username}", d.aliasEndpoint(cleveraws.Index, "username"))
-	r.HandleFunc("/alias/slack/{username}", d.aliasEndpoint(slack.Index, "username"))
+	r.HandleFunc("/alias/slack/{handle}", d.aliasEndpoint(slack.Index, "handle"))
 	r.HandleFunc("/alias/email/{email}", d.aliasEndpoint(integrations.EmailIndex, "email"))
 	return r
 }
