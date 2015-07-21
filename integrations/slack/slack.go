@@ -4,15 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/Clever/who-is-who/integrations"
-)
-
-const (
-	// slackListUsersEndpoint is the API endpoint to query for a list of all users.
-	slackListUsersEndpoint = "https://slack.com/api/users.list"
-	key                    = "slack"
 )
 
 var (
@@ -24,75 +19,42 @@ var (
 	}
 )
 
+// slackListUsersEndpoint creates a full URL for Slack's list.user endpoint.
+func slackListUserEndpoint(tkn string) string {
+	qry := make(url.Values)
+	qry.Set("token", tkn)
+	//  is the API endpoint to query for a list of all users.
+	return (&url.URL{
+		Scheme:   "https",
+		Host:     "slack.com",
+		Path:     "/api/user.list",
+		RawQuery: qry.Encode(),
+	}).String()
+}
+
 // UserMap contains all users given by Slack in an API call. The key to the map is
 // the email address.
 type UserMap struct {
-	Members map[string]Member
+	Members map[string]member
 	Domain  string
 }
 
-// Init calls the Slack API and fills the map with all users.
-// It is an idempotent method.
-func (sul UserMap) Init(token string) error {
-	// short circuit for repeated Init() calls
-	if len(sul.Members) > 0 {
-		return nil
+// NewUserMap creates a new UserMap for obtaining data from Slack.
+func NewUserMap(domain string) UserMap {
+	return UserMap{
+		Domain:  domain,
+		Members: make(map[string]member),
 	}
-
-	// make API call for all users
-	resp, err := http.Get(slackListUsersEndpoint + fmt.Sprintf("?token=%s", token))
-	if err != nil {
-		return fmt.Errorf("Failed to make API call to Slack => {%s}", err)
-	} else if resp.StatusCode != 200 {
-		return fmt.Errorf("Failed to get users list from Slack => {%d status}", resp.StatusCode)
-	}
-	defer resp.Body.Close()
-
-	// parse response
-	var l UserList
-	err = json.NewDecoder(resp.Body).Decode(&l)
-	if err != nil {
-		return fmt.Errorf("Failed to parse Slack's response => {%s}", err)
-	} else if !l.Ok {
-		return fmt.Errorf("Response with %d members marked as not OK", len(l.Members))
-	}
-
-	// fill map with all real users' info
-	for _, u := range l.Members {
-		if u.Profile.Email != "" && u.Name != "" && !u.IsBot && !u.Deleted && strings.Contains(u.Profile.Email, sul.Domain) {
-			sul.Members[strings.ToLower(u.Profile.Email)] = u
-		}
-	}
-
-	return nil
 }
 
-// Fill adds all information that Slack is intended to provide to the User objects.
-// This is [Email, SlackHandle, Names and Phone].
-func (sul UserMap) Fill(m integrations.UserMap) integrations.UserMap {
-	for email, user := range m {
-		member, exists := sul.Members[email]
-		if exists {
-			user.Email = strings.ToLower(member.Profile.Email)
-			user.Slack = member.Name
-			user.FirstName = member.Profile.FirstName
-			user.LastName = member.Profile.LastName
-			user.Phone = member.Profile.Phone
-
-			m[email] = user
-		}
-	}
-	return m
-}
-
-// UserList represents the info returned for the user.list endpoint
-type UserList struct {
-	Members []Member `json:"members"`
+// userList represents the info returned for the user.list endpoint
+type userList struct {
+	Members []member `json:"members"`
 	Ok      bool     `json:"ok"`
 }
 
-// Member represents Slack's record of a user.
-type Member struct {
+// member represents Slack's record of a user.
+type member struct {
 	Color             string `json:"color"`
 	Deleted           bool   `json:"deleted"`
 	HasFiles          bool   `json:"has_files"`
@@ -125,4 +87,58 @@ type Member struct {
 	Tz       string      `json:"tz"`
 	TzLabel  string      `json:"tz_label"`
 	TzOffset int         `json:"tz_offset"`
+}
+
+// Init calls the Slack API and fills the map with all users.
+// It is an idempotent method.
+func (sul UserMap) Init(token string) error {
+	// short circuit for repeated Init() calls
+	if len(sul.Members) > 0 {
+		return nil
+	}
+
+	// make API call for all users
+	resp, err := http.Get(slackListUserEndpoint(token))
+	if err != nil {
+		return fmt.Errorf("Failed to make API call to Slack => {%s}", err)
+	} else if resp.StatusCode != 200 {
+		return fmt.Errorf("Failed to get users list from Slack => {%d status}", resp.StatusCode)
+	}
+	defer resp.Body.Close()
+
+	// parse response
+	var l userList
+	err = json.NewDecoder(resp.Body).Decode(&l)
+	if err != nil {
+		return fmt.Errorf("Failed to parse Slack's response => {%s}", err)
+	} else if !l.Ok {
+		return fmt.Errorf("Response with %d members marked as not OK", len(l.Members))
+	}
+
+	// fill map with all real users' info
+	for _, u := range l.Members {
+		if u.Profile.Email != "" && u.Name != "" && !u.IsBot && !u.Deleted && strings.Contains(u.Profile.Email, sul.Domain) {
+			sul.Members[strings.ToLower(u.Profile.Email)] = u
+		}
+	}
+
+	return nil
+}
+
+// Fill adds all information that Slack is intended to provide to the User objects.
+// This is [Email, SlackHandle, Names and Phone].
+func (sul UserMap) Fill(uMap integrations.UserMap) integrations.UserMap {
+	for email, user := range uMap {
+		m, exists := sul.Members[email]
+		if exists {
+			user.Email = strings.ToLower(m.Profile.Email)
+			user.Slack = m.Name
+			user.FirstName = m.Profile.FirstName
+			user.LastName = m.Profile.LastName
+			user.Phone = m.Profile.Phone
+
+			uMap[email] = user
+		}
+	}
+	return uMap
 }

@@ -54,10 +54,7 @@ func main() {
 	}
 
 	// get Slack info
-	slackData := slack.UserMap{
-		Domain:  domain,
-		Members: make(map[string]slack.Member),
-	}
+	slackData := slack.NewUserMap(domain)
 	err = slackData.Init(slackToken)
 	if err != nil {
 		log.Fatalf("Failed to initialize Slack user list => {%s}", err)
@@ -65,8 +62,8 @@ func main() {
 
 	// seed a map of User's with emails
 	userMap := make(map[string]integrations.User)
-	for _, m := range slackData.Members {
-		userMap[strings.ToLower(m.Profile.Email)] = integrations.User{}
+	for e := range slackData.Members {
+		userMap[strings.ToLower(e)] = integrations.User{}
 	}
 
 	// declare all data sources to be used

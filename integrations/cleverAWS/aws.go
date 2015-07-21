@@ -6,10 +6,6 @@ import (
 	"github.com/Clever/who-is-who/integrations"
 )
 
-const (
-	key = "aws"
-)
-
 var (
 	// Index specifies the data for querying with the Global secondary index created for
 	// queries on AWS usernames.

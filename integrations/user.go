@@ -125,6 +125,12 @@ func (c Client) SaveUsers(l UserMap) error {
 	return nil
 }
 
+// Client wraps the Dynago DynamoDB client.
+type Client struct {
+	Dynamo *dynago.Client
+	Table  string
+}
+
 // GetUser crafts a query for a single user based on the specified index and user information.
 func (c Client) GetUser(idx Index, value string) (User, error) {
 	res, err := c.Dynamo.
@@ -205,10 +211,4 @@ func NewClient(table, endpoint, region, accessKey, secretKey string) (Client, er
 		Dynamo: client,
 		Table:  table,
 	}, nil
-}
-
-// Client wraps the Dynago DynamoDB client.
-type Client struct {
-	Dynamo *dynago.Client
-	Table  string
 }
