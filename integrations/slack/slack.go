@@ -101,10 +101,11 @@ func (sul UserMap) Init(token string) error {
 	resp, err := http.Get(slackListUserEndpoint(token))
 	if err != nil {
 		return fmt.Errorf("Failed to make API call to Slack => {%s}", err)
-	} else if resp.StatusCode != 200 {
-		return fmt.Errorf("Failed to get users list from Slack => {%d status}", resp.StatusCode)
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Failed to get users list from Slack => {%d status}", resp.StatusCode)
+	}
 
 	// parse response
 	var l userList

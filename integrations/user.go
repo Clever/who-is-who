@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
 
 	"github.com/underarmour/dynago"
 	"github.com/underarmour/dynago/schema"
@@ -90,6 +91,12 @@ type InfoSource interface {
 	Fill(UserMap) UserMap
 }
 
+// Client wraps the Dynago DynamoDB client.
+type Client struct {
+	Dynamo *dynago.Client
+	Table  string
+}
+
 // SaveUsers performs batch writes to add all users to Dynamo.
 func (c Client) SaveUsers(l UserMap) error {
 	dynagoObjects := make([]dynago.Document, len(l))
@@ -101,14 +108,12 @@ func (c Client) SaveUsers(l UserMap) error {
 
 	// do a batch write to Dynamo for every 25 users
 	for i := 0; i < len(dynagoObjects)/batchLimit+1; i++ {
-		// properly figure out the indexes on the array
+		// properly figure out the indexes on the array: [i*batch, (i+1)*batch)
 		firstIndex := i * batchLimit
-		lastIndex := (i + 1) * batchLimit
 		if firstIndex >= len(dynagoObjects) {
 			break
-		} else if lastIndex > len(dynagoObjects) {
-			lastIndex = len(dynagoObjects)
 		}
+		lastIndex := int(math.Min(float64((i+1)*batchLimit), float64(len(dynagoObjects))))
 
 		// perform write and check for unprocessed items
 		res, err := c.Dynamo.BatchWrite().Put(c.Table, dynagoObjects[firstIndex:lastIndex]...).Execute()
@@ -123,12 +128,6 @@ func (c Client) SaveUsers(l UserMap) error {
 	}
 
 	return nil
-}
-
-// Client wraps the Dynago DynamoDB client.
-type Client struct {
-	Dynamo *dynago.Client
-	Table  string
 }
 
 // GetUser crafts a query for a single user based on the specified index and user information.

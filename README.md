@@ -19,7 +19,7 @@ Slack profile info is treated as the base source of truth when refreshing the di
 schema: 
 
 ```js
-type User struct {
+{
   "first_name": "abc",
   "last_name": "def"
   "email": "abc@test.com",
