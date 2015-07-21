@@ -54,36 +54,37 @@ func main() {
 	}
 
 	// get Slack info
-	slackData := slack.NewUserMap(domain)
-	err = slackData.Init(slackToken)
-	if err != nil {
-		log.Fatalf("Failed to initialize Slack user list => {%s}", err)
-	}
+	slackData := slack.NewUserMap(domain, slackToken)
 
 	// seed a map of User's with emails
-	userMap := make(map[string]integrations.User)
-	for e := range slackData.Members {
+	emails, err := slackData.EmailList()
+	if err != nil {
+		log.Fatal(kayvee.FormatLog("who-is-who", kayvee.Error, "bad slack conn", m{
+			"msg": err.Error(),
+		}))
+	}
+
+	userMap := make(integrations.UserMap)
+	for _, e := range emails {
 		userMap[strings.ToLower(e)] = integrations.User{}
 	}
 
 	// declare all data sources to be used
 	dataSources := []struct {
 		Service integrations.InfoSource
-		Token   string
 		Name    string
 	}{
-		{slackData, slackToken, "slack"},
-		{aws.AwsService{}, "", "aws"},
+		{slackData, "slack"},
+		{aws.AwsService{}, "aws"},
 	}
 
 	// add data from every data source to every User object
 	for _, src := range dataSources {
-		err := src.Service.Init(src.Token)
+		var err error
+		userMap, err = src.Service.Fill(userMap)
 		if err != nil {
 			log.Printf("Failed to get data from source, %s => {%s}", src.Name, err)
-			continue
 		}
-		userMap = src.Service.Fill(userMap)
 	}
 
 	// try to save everything

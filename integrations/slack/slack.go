@@ -35,15 +35,17 @@ func slackListUserEndpoint(tkn string) string {
 // UserMap contains all users given by Slack in an API call. The key to the map is
 // the email address.
 type UserMap struct {
-	Members map[string]member
-	Domain  string
+	members map[string]member
+	domain  string
+	token   string
 }
 
 // NewUserMap creates a new UserMap for obtaining data from Slack.
-func NewUserMap(domain string) UserMap {
+func NewUserMap(dmn, tkn string) UserMap {
 	return UserMap{
-		Domain:  domain,
-		Members: make(map[string]member),
+		domain:  dmn,
+		token:   tkn,
+		members: make(map[string]member),
 	}
 }
 
@@ -89,16 +91,10 @@ type member struct {
 	TzOffset int         `json:"tz_offset"`
 }
 
-// Init calls the Slack API and fills the map with all users.
-// It is an idempotent method.
-func (sul UserMap) Init(token string) error {
-	// short circuit for repeated Init() calls
-	if len(sul.Members) > 0 {
-		return nil
-	}
-
+// gatherData calls the Slack API and fills the map with all users.
+func (sul UserMap) gatherData() error {
 	// make API call for all users
-	resp, err := http.Get(slackListUserEndpoint(token))
+	resp, err := http.Get(slackListUserEndpoint(sul.token))
 	if err != nil {
 		return fmt.Errorf("Failed to make API call to Slack => {%s}", err)
 	}
@@ -118,19 +114,42 @@ func (sul UserMap) Init(token string) error {
 
 	// fill map with all real users' info
 	for _, u := range l.Members {
-		if u.Profile.Email != "" && u.Name != "" && !u.IsBot && !u.Deleted && strings.Contains(u.Profile.Email, sul.Domain) {
-			sul.Members[strings.ToLower(u.Profile.Email)] = u
+		if u.Profile.Email != "" && u.Name != "" && !u.IsBot && !u.Deleted && strings.Contains(u.Profile.Email, sul.domain) {
+			sul.members[strings.ToLower(u.Profile.Email)] = u
 		}
 	}
 
 	return nil
 }
 
+// EmailList returns a list of all emails owned by this slack org's users.
+func (sul UserMap) EmailList() ([]string, error) {
+	if len(sul.members) == 0 {
+		if err := sul.gatherData(); err != nil {
+			return []string{}, err
+		}
+	}
+
+	emails := make([]string, len(sul.members))
+	var i int
+	for e := range sul.members {
+		emails[i] = e
+		i++
+	}
+	return emails, nil
+}
+
 // Fill adds all information that Slack is intended to provide to the User objects.
 // This is [Email, SlackHandle, Names and Phone].
-func (sul UserMap) Fill(uMap integrations.UserMap) integrations.UserMap {
+func (sul UserMap) Fill(uMap integrations.UserMap) (integrations.UserMap, error) {
+	if len(sul.members) == 0 {
+		if err := sul.gatherData(); err != nil {
+			return uMap, err
+		}
+	}
+
 	for email, user := range uMap {
-		m, exists := sul.Members[email]
+		m, exists := sul.members[email]
 		if exists {
 			user.Email = strings.ToLower(m.Profile.Email)
 			user.Slack = m.Name
@@ -141,5 +160,5 @@ func (sul UserMap) Fill(uMap integrations.UserMap) integrations.UserMap {
 			uMap[email] = user
 		}
 	}
-	return uMap
+	return uMap, nil
 }
