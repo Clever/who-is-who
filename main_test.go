@@ -8,7 +8,7 @@ import (
 
 	"github.com/Clever/kayvee-go"
 	"github.com/Clever/who-is-who/integrations"
-	"github.com/Clever/who-is-who/who-is-who"
+	"github.com/Clever/who-is-who/whos-who"
 	"github.com/gorilla/mux"
 )
 
