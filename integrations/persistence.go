@@ -5,9 +5,9 @@ import (
 	"log"
 	"math"
 
-	"github.com/underarmour/dynago"
-	"github.com/underarmour/dynago/schema"
 	"gopkg.in/clever/kayvee-go.v2"
+	"gopkg.in/underarmour/dynago.v1"
+	"gopkg.in/underarmour/dynago.v1/schema"
 )
 
 // Client wraps the Dynago DynamoDB client.
