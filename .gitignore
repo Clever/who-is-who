@@ -3,3 +3,13 @@ service-account.json
 *.pem
 who-is-who
 updater
+
+# dynamo crap
+dynamodb_local_latest.tar.gz
+DynamoDBLocal.jar
+DynamoDBLocal_lib/
+LICENSE.txt
+README.txt
+directory/
+third_party_licenses/
+
