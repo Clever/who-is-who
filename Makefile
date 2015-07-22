@@ -7,7 +7,7 @@ PKGS = $(PKG)
 golint:
 	@go get github.com/golang/lint/golint
 
-test:
+test: $(PKGS)
 	go get ./...
 	./integration_tests.sh
 
@@ -22,9 +22,6 @@ endif
 ifeq ($(COVERAGE),1)
 	@go test -cover -coverprofile=$(GOPATH)/src/$@/c.out $@ -test.v
 	@go tool cover -html=$(GOPATH)/src/$@/c.out
-else
-	@echo "TESTING..."
-	@go test $@ -test.v
 endif
 
 run:
