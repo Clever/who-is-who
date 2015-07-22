@@ -1,4 +1,4 @@
-image: golang:1.4
+image: natebrennand/docker-go-java
 notify:
   email:
     recipients:
@@ -21,7 +21,5 @@ publish:
     when:
       branch: master
 script:
-- apt-get update
-- apt-get install -y default-jre
 - make test
 
