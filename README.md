@@ -39,6 +39,11 @@ schema:
   - Returns info for all users
 
 
+## Syncing
+
+Please see [who-is-who-sync](https://github.com/Clever/who-is-who-sync).
+
+
 ## Storage
 
 Data is stored in DynamoDB.
