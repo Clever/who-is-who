@@ -37,8 +37,8 @@ func requiredEnv(key string) string {
 
 func setupEnvVars() {
 	port = requiredEnv("PORT")
-	awsKey = requiredEnv("AWS_ACCESS_KEY")
-	awsSecret = requiredEnv("AWS_SECRET_KEY")
+	awsKey = requiredEnv("AWS_ACCESS_KEY_ID")
+	awsSecret = requiredEnv("AWS_SECRET_ACCESS_KEY")
 	dynamoTable = requiredEnv("DYNAMO_TABLE")
 	dynamoRegion = requiredEnv("DYNAMO_REGION")
 	dynamoEndpoint = requiredEnv("DYNAMO_ENDPOINT")

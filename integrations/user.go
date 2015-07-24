@@ -16,17 +16,19 @@ const (
 	slackKey     = "slack"
 	phoneKey     = "phone"
 	awsKey       = "aws"
+
+	slackIndex = "slack-index"
+	awsIndex   = "aws-index"
 )
 
 var (
 	// EmailIndex is used for querying Dynamo for a user based on their email. This is also
 	// the primary index for Dynamo.
 	EmailIndex = Index{"", "email"}
-	// FreeTierThroughput is the maximum throughput that we can use for Dynamo without
-	// entering the paid tier.
+	// FreeTierThroughput is set low within the free tier
 	FreeTierThroughput = schema.ProvisionedThroughput{
-		ReadCapacityUnits:  25,
-		WriteCapacityUnits: 25,
+		ReadCapacityUnits:  1,
+		WriteCapacityUnits: 1,
 	}
 	// ErrUserDNE represents the case when a query executes properly but the user is
 	// not found in the database.

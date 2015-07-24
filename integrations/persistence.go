@@ -100,10 +100,10 @@ func NewClient(table, endpoint, region, accessKey, secretKey string) (Client, er
 			},
 			KeySchema: []schema.KeySchema{
 				{emailKey, schema.HashKey},
-				{slackKey, schema.RangeKey},
 			},
 			ProvisionedThroughput: FreeTierThroughput,
 			GlobalSecondaryIndexes: []schema.SecondaryIndex{
+				// index on AWS
 				schema.SecondaryIndex{
 					IndexName: awsKey,
 					KeySchema: []schema.KeySchema{
@@ -112,8 +112,9 @@ func NewClient(table, endpoint, region, accessKey, secretKey string) (Client, er
 					Projection:            schema.Projection{ProjectionType: schema.ProjectAll},
 					ProvisionedThroughput: FreeTierThroughput,
 				},
+				// index on Slack
 				schema.SecondaryIndex{
-					IndexName: slackKey,
+					IndexName: slackIndex,
 					KeySchema: []schema.KeySchema{
 						{slackKey, schema.HashKey},
 					},
