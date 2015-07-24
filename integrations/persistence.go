@@ -105,7 +105,7 @@ func NewClient(table, endpoint, region, accessKey, secretKey string) (Client, er
 			GlobalSecondaryIndexes: []schema.SecondaryIndex{
 				// index on AWS
 				schema.SecondaryIndex{
-					IndexName: awsKey,
+					IndexName: awsIndex,
 					KeySchema: []schema.KeySchema{
 						{awsKey, schema.HashKey},
 					},

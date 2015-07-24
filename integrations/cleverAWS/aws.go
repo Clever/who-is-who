@@ -10,7 +10,7 @@ var (
 	// Index specifies the data for querying with the Global secondary index created for
 	// queries on AWS usernames.
 	Index = integrations.Index{
-		Index: "aws",
+		Index: "aws-index",
 		Field: "aws",
 	}
 )

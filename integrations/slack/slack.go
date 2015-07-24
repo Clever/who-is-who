@@ -14,7 +14,7 @@ var (
 	// Index specifies the data for querying with the Global secondary index created for
 	// queries on slack usernames.
 	Index = integrations.Index{
-		Index: "slack",
+		Index: "slack-index",
 		Field: "slack",
 	}
 )
@@ -27,7 +27,7 @@ func slackListUserEndpoint(tkn string) string {
 	return (&url.URL{
 		Scheme:   "https",
 		Host:     "slack.com",
-		Path:     "/api/user.list",
+		Path:     "/api/users.list",
 		RawQuery: qry.Encode(),
 	}).String()
 }
@@ -92,7 +92,7 @@ type member struct {
 }
 
 // gatherData calls the Slack API and fills the map with all users.
-func (sul UserMap) gatherData() error {
+func (sul *UserMap) gatherData() error {
 	// make API call for all users
 	resp, err := http.Get(slackListUserEndpoint(sul.token))
 	if err != nil {
