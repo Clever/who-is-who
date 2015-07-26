@@ -1,0 +1,12 @@
+run:
+    type: docker
+resources:
+    cpu: 0.25
+env:
+    - DOMAIN
+    - PORT
+    - AWS_ACCESS_KEY
+    - AWS_SECRET_KEY
+    - DYNAMO_TABLE
+    - DYNAMO_REGION
+    - DYNAMO_ENDPOINT
