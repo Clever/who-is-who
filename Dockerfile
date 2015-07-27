@@ -11,4 +11,4 @@ WORKDIR "$dir"
 RUN go get ./...
 RUN go build
 
-CMD ["./$service"]
+CMD ["./who-is-who"]
