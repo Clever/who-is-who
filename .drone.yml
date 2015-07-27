@@ -1,4 +1,4 @@
-image: natebrennand/docker-go-java
+image: bradrydzewski/go:1.4
 notify:
   email:
     recipients:
