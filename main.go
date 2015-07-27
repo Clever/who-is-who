@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,16 +13,21 @@ import (
 )
 
 var (
-	port           string
 	awsKey         string
 	awsSecret      string
 	dynamoTable    string
 	dynamoRegion   string
 	dynamoEndpoint string
+	port           string
 )
 
 // m is a convenience type for using kayvee.
 type m map[string]interface{}
+
+func init() {
+	flag.StringVar(&port, "port", ":80", "specify the HTTP port to listen on")
+	flag.Parse()
+}
 
 // requiredEnv tries to find a value in the environment variables. If a value is not
 // found the program will panaic.
@@ -36,7 +42,6 @@ func requiredEnv(key string) string {
 }
 
 func setupEnvVars() {
-	port = requiredEnv("PORT")
 	awsKey = requiredEnv("AWS_ACCESS_KEY_ID")
 	awsSecret = requiredEnv("AWS_SECRET_ACCESS_KEY")
 	dynamoTable = requiredEnv("DYNAMO_TABLE")
