@@ -62,5 +62,10 @@ func main() {
 	log.Println(kayvee.FormatLog("who-is-who", kayvee.Info, "server startup", m{
 		"message": fmt.Sprintf("Listening on %s", port),
 	}))
-	http.ListenAndServe(port, d.HookUpRouter())
+	err = http.ListenAndServe(port, d.HookUpRouter())
+	if err != nil {
+		log.Fatal(kayvee.FormatLog("who-is-who", kayvee.Error, "server startup failure", m{
+			"msg": err.Error(),
+		}))
+	}
 }
