@@ -27,8 +27,8 @@ var (
 	EmailIndex = Index{"", "email"}
 	// FreeTierThroughput is set low within the free tier
 	FreeTierThroughput = schema.ProvisionedThroughput{
-		ReadCapacityUnits:  1,
-		WriteCapacityUnits: 1,
+		ReadCapacityUnits:  2,
+		WriteCapacityUnits: 2,
 	}
 	// ErrUserDNE represents the case when a query executes properly but the user is
 	// not found in the database.
