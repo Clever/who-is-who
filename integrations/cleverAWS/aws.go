@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	// Index specifies the data for querying with the Global secondary index created for
+	// Index specifies the data for querying with the Global Secondary Index created for
 	// queries on AWS usernames.
 	Index = integrations.Index{
 		Index: "aws-index",

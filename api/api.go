@@ -8,6 +8,7 @@ import (
 	"github.com/Clever/kayvee-go"
 	"github.com/Clever/who-is-who/integrations"
 	"github.com/Clever/who-is-who/integrations/cleverAWS"
+	"github.com/Clever/who-is-who/integrations/github"
 	"github.com/Clever/who-is-who/integrations/slack"
 	"github.com/gorilla/mux"
 )
@@ -87,6 +88,7 @@ func (d DynamoConn) HookUpRouter() *mux.Router {
 	r.HandleFunc("/alias/aws/{username}", d.aliasEndpoint(cleveraws.Index, "username"))
 	r.HandleFunc("/alias/slack/{handle}", d.aliasEndpoint(slack.Index, "handle"))
 	r.HandleFunc("/alias/email/{email}", d.aliasEndpoint(integrations.EmailIndex, "email"))
+	r.HandleFunc("/alias/github/{username}", d.aliasEndpoint(github.Index, "username"))
 	r.HandleFunc("/health/check", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK")) // 200 status is autoset
 	})

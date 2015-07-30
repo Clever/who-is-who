@@ -16,9 +16,11 @@ const (
 	slackKey     = "slack"
 	phoneKey     = "phone"
 	awsKey       = "aws"
+	githubKey    = "github"
 
-	slackIndex = "slack-index"
-	awsIndex   = "aws-index"
+	slackIndex  = "slack-index"
+	awsIndex    = "aws-index"
+	githubIndex = "github-index"
 )
 
 var (
@@ -44,12 +46,13 @@ type Index struct {
 
 // User represents the data collected and served by who's who
 type User struct {
-	FirstName string `json:"first_name"` // Slack
-	LastName  string `json:"last_name"`  // Slack
-	Email     string `json:"email"`      // Slack
-	Slack     string `json:"slack"`      // Slack
-	Phone     string `json:"phone"`      // Slack
-	AWS       string `json:"aws"`        // first initial + last name
+	FirstName string `json:"first_name"`       // Slack
+	LastName  string `json:"last_name"`        // Slack
+	Email     string `json:"email"`            // Slack
+	Slack     string `json:"slack"`            // Slack
+	Phone     string `json:"phone"`            // Slack
+	AWS       string `json:"aws"`              // first initial + last name
+	Github    string `json:"github,omitempty"` // Github
 }
 
 // ToDynago converts a User object into a dynago.Document object.
@@ -61,6 +64,7 @@ func (u User) ToDynago() dynago.Document {
 		lastNameKey:  u.LastName,
 		phoneKey:     u.Phone,
 		awsKey:       u.AWS,
+		githubKey:    u.Github,
 	}
 }
 
@@ -73,6 +77,7 @@ func UserFromDynago(doc dynago.Document) User {
 		Slack:     doc.GetString(slackKey),
 		Phone:     doc.GetString(phoneKey),
 		AWS:       doc.GetString(awsKey),
+		Github:    doc.GetString(githubKey),
 	}
 }
 
