@@ -3,11 +3,13 @@ package slack
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/Clever/who-is-who/integrations"
+	kv "gopkg.in/clever/kayvee-go.v2"
 )
 
 var (
@@ -116,6 +118,11 @@ func (sul *UserMap) gatherData() error {
 	for _, u := range l.Members {
 		if u.Profile.Email != "" && u.Name != "" && !u.IsBot && !u.Deleted && strings.Contains(u.Profile.Email, sul.domain) {
 			sul.members[strings.ToLower(u.Profile.Email)] = u
+		} else {
+			// this is printed for debugging purposes to track down users missing Slack profile information
+			log.Println(kv.FormatLog("who-is-who", kv.Info, "skipped user", map[string]interface{}{
+				"info": fmt.Sprintf("%#v", u),
+			}))
 		}
 	}
 

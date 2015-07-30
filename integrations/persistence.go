@@ -4,16 +4,34 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"time"
 
 	"gopkg.in/clever/kayvee-go.v2"
 	"gopkg.in/underarmour/dynago.v1"
 	"gopkg.in/underarmour/dynago.v1/schema"
 )
 
-// Client wraps the Dynago DynamoDB client.
+const (
+	cacheTTL = time.Minute * 10
+)
+
+// cacheList is meant to wrap a caching layer over a list users call to Dynamo.  This is used
+// because Dynamo's throughput is allocated on a per record basis, therefore calls to /list run
+// through ~100 items which is well over our single digit / second allocation (Dynamo watches
+// requests on a 5 minute moving window).
+// Given the nature of the data which is periodically synced, putting the list of users in a
+// cache is reasonable.
+type cacheList struct {
+	Users       []User
+	lastUpdated time.Time
+}
+
+// Client wraps the Dynago DynamoDB client. It also contains a cached copy of the list of users
+// last returned by a database query.
 type Client struct {
 	Dynamo *dynago.Client
 	Table  string
+	cache  cacheList
 }
 
 // SaveUsers performs batch writes to add all users to Dynamo.
@@ -70,6 +88,11 @@ func (c Client) GetUser(idx Index, value string) (User, error) {
 
 // GetUserList returns all users.
 func (c Client) GetUserList() ([]User, error) {
+	// return cached users if they were refreshed in the last 10 minutes
+	if c.cache.lastUpdated.Add(cacheTTL).After(time.Now()) {
+		return c.cache.Users, nil
+	}
+
 	res, err := c.Dynamo.Scan(c.Table).Execute()
 	if err != nil {
 		return []User{}, fmt.Errorf("Failed to scan table, %s", err)
@@ -80,19 +103,25 @@ func (c Client) GetUserList() ([]User, error) {
 		users[i] = UserFromDynago(d)
 	}
 
+	// update cache with user
+	c.cache = cacheList{
+		Users:       users,
+		lastUpdated: time.Now(),
+	}
+
 	return users, nil
 }
 
 // NewClient creates a conection to DynamoDB, then creates the
-func NewClient(table, endpoint, region, accessKey, secretKey string) (Client, error) {
+func NewClient(tablename, endpoint, region, accessKey, secretKey string) (Client, error) {
 	executor := dynago.NewAwsExecutor(endpoint, region, accessKey, secretKey)
 	client := dynago.NewClient(executor)
 
 	// DescribeTable 400's if table DNE
-	_, err := client.DescribeTable(table)
+	_, err := client.DescribeTable(tablename)
 	if err != nil {
 		_, err := client.CreateTable(&schema.CreateRequest{
-			TableName: table,
+			TableName: tablename,
 			AttributeDefinitions: []schema.AttributeDefinition{
 				{emailKey, schema.String},
 				{slackKey, schema.String},
@@ -140,6 +169,6 @@ func NewClient(table, endpoint, region, accessKey, secretKey string) (Client, er
 
 	return Client{
 		Dynamo: client,
-		Table:  table,
+		Table:  tablename,
 	}, nil
 }
