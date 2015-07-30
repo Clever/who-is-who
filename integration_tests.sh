@@ -11,9 +11,9 @@ then
 fi
 
 # start up DynamoDBLocal for integration tests
-java -jar "$jar" -sharedDb -inMemory &
+java -jar "$jar" -sharedDb -inMemory -port 8002 &
 sleep 2
-export DYNAMO_ENDPOINT=http://localhost:8000
+export DYNAMO_ENDPOINT=http://localhost:8002
 
 # run our tests
 go test -v ./...

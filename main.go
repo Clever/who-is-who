@@ -9,7 +9,7 @@ import (
 
 	"github.com/Clever/who-is-who/api"
 	"github.com/Clever/who-is-who/integrations"
-	"gopkg.in/clever/kayvee-go.v2"
+	kv "gopkg.in/clever/kayvee-go.v2"
 )
 
 var (
@@ -21,7 +21,7 @@ var (
 	port           string
 )
 
-// m is a convenience type for using kayvee.
+// m is a convenience type for using kv.
 type m map[string]interface{}
 
 func init() {
@@ -34,7 +34,7 @@ func init() {
 func requiredEnv(key string) string {
 	value := os.Getenv(key)
 	if value == "" {
-		log.Fatal(kayvee.FormatLog("who-is-who", kayvee.Error, "missing env var", m{
+		log.Fatal(kv.FormatLog("who-is-who", kv.Error, "missing env var", m{
 			"var": key,
 		}))
 	}
@@ -55,7 +55,7 @@ func main() {
 	// setup dynamodb connection
 	c, err := integrations.NewClient(dynamoTable, dynamoEndpoint, dynamoRegion, awsKey, awsSecret)
 	if err != nil {
-		log.Fatal(kayvee.FormatLog("who-is-who", kayvee.Error, "dynamo connection", m{
+		log.Fatal(kv.FormatLog("who-is-who", kv.Error, "dynamo connection", m{
 			"message": err.Error(),
 		}))
 	}
@@ -64,12 +64,12 @@ func main() {
 	}
 
 	// setup HTTP server
-	log.Println(kayvee.FormatLog("who-is-who", kayvee.Info, "server startup", m{
+	log.Println(kv.FormatLog("who-is-who", kv.Info, "server startup", m{
 		"message": fmt.Sprintf("Listening on %s", port),
 	}))
 	err = http.ListenAndServe(port, d.HookUpRouter())
 	if err != nil {
-		log.Fatal(kayvee.FormatLog("who-is-who", kayvee.Error, "server startup failure", m{
+		log.Fatal(kv.FormatLog("who-is-who", kv.Error, "server startup failure", m{
 			"msg": err.Error(),
 		}))
 	}
