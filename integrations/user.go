@@ -16,9 +16,11 @@ const (
 	slackKey     = "slack"
 	phoneKey     = "phone"
 	awsKey       = "aws"
+	githubKey    = "github"
 
-	slackIndex = "slack-index"
-	awsIndex   = "aws-index"
+	slackIndex  = "slack-index"
+	awsIndex    = "aws-index"
+	githubIndex = "github-index"
 )
 
 var (
@@ -27,8 +29,8 @@ var (
 	EmailIndex = Index{"", "email"}
 	// FreeTierThroughput is set low within the free tier
 	FreeTierThroughput = schema.ProvisionedThroughput{
-		ReadCapacityUnits:  1,
-		WriteCapacityUnits: 1,
+		ReadCapacityUnits:  2,
+		WriteCapacityUnits: 2,
 	}
 	// ErrUserDNE represents the case when a query executes properly but the user is
 	// not found in the database.
@@ -44,17 +46,18 @@ type Index struct {
 
 // User represents the data collected and served by who's who
 type User struct {
-	FirstName string `json:"first_name"` // Slack
-	LastName  string `json:"last_name"`  // Slack
-	Email     string `json:"email"`      // Slack
-	Slack     string `json:"slack"`      // Slack
-	Phone     string `json:"phone"`      // Slack
-	AWS       string `json:"aws"`        // first initial + last name
+	FirstName string `json:"first_name"`       // Slack
+	LastName  string `json:"last_name"`        // Slack
+	Email     string `json:"email"`            // Slack
+	Slack     string `json:"slack"`            // Slack
+	Phone     string `json:"phone"`            // Slack
+	AWS       string `json:"aws"`              // first initial + last name
+	Github    string `json:"github,omitempty"` // Github
 }
 
 // ToDynago converts a User object into a dynago.Document object.
 func (u User) ToDynago() dynago.Document {
-	return dynago.Document{
+	d := dynago.Document{
 		emailKey:     u.Email,
 		slackKey:     u.Slack,
 		firstNameKey: u.FirstName,
@@ -62,6 +65,12 @@ func (u User) ToDynago() dynago.Document {
 		phoneKey:     u.Phone,
 		awsKey:       u.AWS,
 	}
+
+	// don't overwrite Github keys with empty strings
+	if u.Github != "" {
+		d[githubKey] = u.Github
+	}
+	return d
 }
 
 // UserFromDynago builds a user object from a dynago.Document.
@@ -73,6 +82,7 @@ func UserFromDynago(doc dynago.Document) User {
 		Slack:     doc.GetString(slackKey),
 		Phone:     doc.GetString(phoneKey),
 		AWS:       doc.GetString(awsKey),
+		Github:    doc.GetString(githubKey),
 	}
 }
 
