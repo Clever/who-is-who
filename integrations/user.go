@@ -57,15 +57,20 @@ type User struct {
 
 // ToDynago converts a User object into a dynago.Document object.
 func (u User) ToDynago() dynago.Document {
-	return dynago.Document{
+	d := dynago.Document{
 		emailKey:     u.Email,
 		slackKey:     u.Slack,
 		firstNameKey: u.FirstName,
 		lastNameKey:  u.LastName,
 		phoneKey:     u.Phone,
 		awsKey:       u.AWS,
-		githubKey:    u.Github,
 	}
+
+	// don't overwrite Github keys with empty strings
+	if u.Github != "" {
+		d[githubKey] = u.Github
+	}
+	return d
 }
 
 // UserFromDynago builds a user object from a dynago.Document.
