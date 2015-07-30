@@ -1,7 +1,9 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
+	"html/template"
 	"log"
 	"net/http"
 
@@ -12,6 +14,45 @@ import (
 	"github.com/Clever/who-is-who/integrations/slack"
 	"github.com/gorilla/mux"
 )
+
+var (
+	welcomePageBuffer   bytes.Buffer
+	welcomePageTemplate = `
+<h1>Who's Who</h1>
+
+<p>Endpoints</p>
+
+{{ range . }}
+  <h3>{{ .Endpoint }}</h3>
+  <p>{{ .Description }}</p>
+{{ end }}`
+	routesImplemented = []struct {
+		Endpoint, Description string
+	}{
+		{"/alias/email/:email", "Returns info for a user with an email of :email"},
+		{"/alias/slack/:handle", "Returns info for a user with a Slack handle of :handle"},
+		{"/alias/aws/:username", "Returns info for a user with an AWS username of :username"},
+		{"/alias/github/:username", "Returns info for a user with a Github username of :username"},
+		{"/list", "Returns info for all user"},
+	}
+)
+
+func init() {
+	// execute and store the welcome page template to display routes available to API consumers
+	tmpl, err := template.New("welcome").Parse(welcomePageTemplate)
+	if err != nil {
+		log.Fatal(kayvee.FormatLog("who-is-who", kayvee.Error, "template parsing error", m{
+			"message": err.Error(),
+		}))
+	}
+	err = tmpl.Execute(&welcomePageBuffer, routesImplemented)
+	if err != nil {
+		log.Fatal(kayvee.FormatLog("who-is-who", kayvee.Error, "template building error", m{
+			"message": err.Error(),
+		}))
+	}
+
+}
 
 // m is a convenience type for using kayvee.
 type m map[string]interface{}
@@ -91,6 +132,9 @@ func (d DynamoConn) HookUpRouter() *mux.Router {
 	r.HandleFunc("/alias/github/{username}", d.aliasEndpoint(github.Index, "username"))
 	r.HandleFunc("/health/check", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK")) // 200 status is autoset
+	})
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write(welcomePageBuffer.Bytes())
 	})
 	return r
 }
