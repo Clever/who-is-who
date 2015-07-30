@@ -14,6 +14,9 @@ import (
 	kv "gopkg.in/clever/kayvee-go.v2"
 )
 
+// m is a convenience type for using kayvee.
+type m map[string]interface{}
+
 var (
 	emailRgx *regexp.Regexp
 	// Index specifies the data for querying with the Global Secondary Index created for
@@ -48,9 +51,9 @@ func (l UserList) Fill(u integrations.UserMap) (integrations.UserMap, error) {
 		if err != nil {
 			return u, fmt.Errorf("Failed to form HTTP request for Github => {%s}", err)
 		}
-		for _, m := range members {
-			if m.Login != nil && *m.Login != "" {
-				email := findEmail(gh, *m.Login)
+		for _, mbr := range members {
+			if mbr.Login != nil && *mbr.Login != "" {
+				email := findEmail(gh, *mbr.Login)
 				if email == "" {
 					continue
 				}
@@ -58,8 +61,13 @@ func (l UserList) Fill(u integrations.UserMap) (integrations.UserMap, error) {
 				// add username to user if we find one with a matching email
 				user, exists := u[email]
 				if exists {
-					user.Github = *m.Login
+					user.Github = *mbr.Login
 					u[email] = user
+				} else {
+					log.Println(kv.FormatLog("who-is-who", kv.Info, "mismatched email", m{
+						"message": fmt.Sprintf("Found %s email but no user", l.Domain),
+						"email":   email,
+					}))
 				}
 			}
 		}
@@ -78,12 +86,12 @@ func (l UserList) Fill(u integrations.UserMap) (integrations.UserMap, error) {
 func findEmail(c *githubAPI.Client, username string) string {
 	events, resp, err := c.Activity.ListEventsPerformedByUser(username, true, nil)
 	if err != nil {
-		log.Println(kv.FormatLog("who-is-who", kayvee.Error, "Github API error", map[string]interface{}{
+		log.Println(kv.FormatLog("who-is-who", kayvee.Error, "Github API error", m{
 			"msg": err.Error(),
 		}))
 		return ""
 	} else if resp.StatusCode != http.StatusOK {
-		log.Println(kv.FormatLog("who-is-who", kayvee.Error, "Github API error", map[string]interface{}{
+		log.Println(kv.FormatLog("who-is-who", kayvee.Error, "Github API error", m{
 			"status code": resp.StatusCode,
 		}))
 		return ""
