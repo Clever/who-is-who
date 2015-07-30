@@ -49,19 +49,22 @@ func (l UserList) Fill(u integrations.UserMap) (integrations.UserMap, error) {
 			return u, fmt.Errorf("Failed to form HTTP request for Github => {%s}", err)
 		}
 		for _, m := range members {
-			_ = m
 			if m.Login != nil && *m.Login != "" {
 				email := findEmail(gh, *m.Login)
-				if email != "" {
-					user, exists := u[email]
-					if exists {
-						user.Github = *m.Login
-						u[email] = user
-					}
+				if email == "" {
+					continue
+				}
+
+				// add username to user if we find one with a matching email
+				user, exists := u[email]
+				if exists {
+					user.Github = *m.Login
+					u[email] = user
 				}
 			}
 		}
 
+		// cycle through all pages of org users
 		if resp.NextPage == 0 {
 			break
 		} else {
