@@ -37,7 +37,7 @@ type UserList struct {
 // Fill make the necessary API calls to get all members of a Github Org. Then we attempt to find
 // emails for every developer in their public history.
 func (l UserList) Fill(u integrations.UserMap) (integrations.UserMap, error) {
-	emailRgx = regexp.MustCompile(fmt.Sprintf(`"email":"([\w\.]+@%s)"`, l.Domain))
+	emailRgx = regexp.MustCompile(fmt.Sprintf(`"email":"(\w+\.\w+@%s)"`, l.Domain))
 
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: l.Token},

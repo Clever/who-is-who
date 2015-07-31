@@ -46,6 +46,16 @@ func (c Client) UserByAWS(username string) (integrations.User, error) {
 	return returnUser(resp)
 }
 
+// UserByGithub finds a user based on their Github username.
+func (c Client) UserByGithub(username string) (integrations.User, error) {
+	resp, err := http.Get(c.endpoint + fmt.Sprintf("/alias/github/%s", username))
+	if err != nil {
+		return integrations.User{}, fmt.Errorf("aws alias match call failed => {%s}", err)
+	}
+
+	return returnUser(resp)
+}
+
 // UserBySlack finds a user based on their Slack username.
 func (c Client) UserBySlack(username string) (integrations.User, error) {
 	resp, err := http.Get(c.endpoint + fmt.Sprintf("/alias/slack/%s", username))
