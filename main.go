@@ -9,7 +9,7 @@ import (
 
 	"github.com/Clever/who-is-who/api"
 	"github.com/Clever/who-is-who/integrations"
-	kv "gopkg.in/clever/kayvee-go.v2"
+	kv "gopkg.in/Clever/kayvee-go.v2"
 )
 
 var (

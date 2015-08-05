@@ -11,7 +11,7 @@ import (
 	"github.com/Clever/who-is-who/integrations"
 	githubAPI "github.com/google/go-github/github"
 	"golang.org/x/oauth2"
-	kv "gopkg.in/clever/kayvee-go.v2"
+	kv "gopkg.in/Clever/kayvee-go.v2"
 )
 
 // m is a convenience type for using kayvee.
