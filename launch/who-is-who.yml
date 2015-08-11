@@ -1,15 +1,18 @@
 run:
-    type: docker
+  type: docker
 resources:
-    cpu: 0.25
+  cpu: 0.25
 env:
-    - DOMAIN
-    - AWS_ACCESS_KEY
-    - AWS_SECRET_KEY
-    - DYNAMO_TABLE
-    - DYNAMO_REGION
-    - DYNAMO_ENDPOINT
+- DOMAIN
+- AWS_ACCESS_KEY
+- AWS_SECRET_KEY
+- DYNAMO_TABLE
+- DYNAMO_REGION
+- DYNAMO_ENDPOINT
 expose:
-  - name: http # identifier for this port mapping
-    port: 80   # port to map to inside the container
-    bind: 80   # port to bind the reverse proxy to (for the world)
+- name: http
+  port: 80
+  bind: 80
+  health_check:
+    type: http
+    path: /health/check
