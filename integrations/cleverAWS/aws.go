@@ -1,6 +1,7 @@
 package cleveraws
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Clever/who-is-who/integrations"
@@ -17,6 +18,11 @@ var (
 
 // AwsService does the computation to form AWS usernames with a first initial and last name.
 type AwsService struct{}
+
+// Dummy function right now
+func (a AwsService) GetUsernameEmailPair() (string, string, error) {
+	return "", "", fmt.Errorf("No function defined for GetUsernameEmailPair")
+}
 
 // Fill uses the first and last name to form an AWS username.
 func (a AwsService) Fill(m integrations.UserMap) (integrations.UserMap, error) {
