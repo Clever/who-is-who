@@ -1,7 +1,6 @@
 package cleveraws
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/Clever/who-is-who/integrations"
