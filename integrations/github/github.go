@@ -34,6 +34,40 @@ type UserList struct {
 	Org    string
 }
 
+// Uses GitHub API to get username and list of emails for a given API token. Goes through
+// emails and finds the one that matches the domain passed in (clever.com). Returns username, email, error
+func GetUsernameEmailPair(token string, domain string) (string, string, error) {
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	tc := oauth2.NewClient(oauth2.NoContext, ts)
+	gh := githubAPI.NewClient(tc)
+
+	thisUser, _, err := gh.Users.Get("")
+	if err != nil {
+		return "", "", fmt.Errorf("Failed to form HTTP request for Github => {%s}", err)
+	}
+
+	opt := &githubAPI.ListOptions{}
+	emails, _, err := gh.Users.ListEmails(opt)
+	if err != nil {
+		return "", "", fmt.Errorf("Failed to form HTTP request for Github => {%s}", err)
+	}
+
+	for _,e := range emails {
+		email := *e.Email
+		emailSplit := strings.Split(email, "@")
+		isClever := domain == emailSplit[len(emailSplit)-1]
+		if isClever {
+			if email == "" {
+				continue
+			}
+			return *thisUser.Login, email, nil
+		}
+	}
+	return "", "", fmt.Errorf("Failed to find email/username pair for this token")
+}
+
 // Fill make the necessary API calls to get all members of a Github Org. Then we attempt to find
 // emails for every developer in their public history.
 func (l UserList) Fill(u integrations.UserMap) (integrations.UserMap, error) {
