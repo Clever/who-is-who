@@ -139,11 +139,6 @@ func (sul UserMap) EmailList() ([]string, error) {
 	return emails, nil
 }
 
-// Dummy function
-func (sul UserMap) GetUsernameEmailPair() (string, string, error) {
-	return "", "", fmt.Errorf("No function defined for GetUsernameEmailPair")
-}
-
 // Fill adds all information that Slack is intended to provide to the User objects.
 // This is [Email, SlackHandle, Names and Phone].
 func (sul UserMap) Fill(uMap integrations.UserMap) (integrations.UserMap, error) {

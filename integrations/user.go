@@ -95,5 +95,4 @@ type InfoSource interface {
 	// Fill adds this data source's attributes of the user. It is expected that a user may
 	// not have information in every InfoSource.
 	Fill(UserMap) (UserMap, error)
-	GetUsernameEmailPair() (string, string, error)
 }
