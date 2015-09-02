@@ -36,9 +36,9 @@ type UserList struct {
 
 // Uses GitHub API to get username and list of emails for a given API token. Goes through
 // emails and finds the one that matches the domain passed in (clever.com). Returns username, email, error
-func (l UserList) GetUsernameEmailPair() (string, string, error) {
+func GetUsernameEmailPair(token string, domain string) (string, string, error) {
 	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: l.Token},
+		&oauth2.Token{AccessToken: token},
 	)
 	tc := oauth2.NewClient(oauth2.NoContext, ts)
 	gh := githubAPI.NewClient(tc)
@@ -57,7 +57,7 @@ func (l UserList) GetUsernameEmailPair() (string, string, error) {
 	for _,e := range emails {
 		email := *e.Email
 		emailSplit := strings.Split(email, "@")
-		isClever := l.Domain == emailSplit[len(emailSplit)-1]
+		isClever := domain == emailSplit[len(emailSplit)-1]
 		if isClever {
 			if email == "" {
 				continue
