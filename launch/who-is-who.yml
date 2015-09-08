@@ -16,3 +16,6 @@ expose:
   health_check:
     type: http
     path: /health/check
+elbs:
+  production:
+  - who-is-who-service
