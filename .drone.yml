@@ -9,6 +9,11 @@ notify:
     on_success: false
     webhook_url: $$slack_webhook
 publish:
+  catapult:
+    url: $$catapult_url
+    application: "who-is-who"
+    when:
+      branch: master
   docker:
     docker_version: 1.7.1
     docker_host: $$docker_server
@@ -23,4 +28,3 @@ publish:
       branch: master
 script:
 - make test
-
