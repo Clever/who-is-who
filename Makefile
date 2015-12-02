@@ -1,22 +1,29 @@
 SHELL := /bin/bash
 PKG = github.com/Clever/who-is-who
-PKGS = $(PKG)
+PKGS := $(shell go list ./... | grep -v /vendor)
+EXECUTABLE := who-is-who
+.PHONY: test build vendor run
 
-.PHONY: test golint README.md README
+GOLINT := $(GOPATH)/bin/golint
+$(GOLINT):
+	go get github.com/golang/lint/golint
 
-golint:
-	@go get github.com/golang/lint/golint
+GODEP := $(GOPATH)/bin/godep
+$(GODEP):
+	go get -u github.com/tools/godep
+
+build:
+	go build -o bin/$(EXECUTABLE) $(PKG)
 
 test: $(PKGS)
-	go get ./...
 	./integration_tests.sh
 
-$(PKGS): golint README
+$(PKGS): $(GOLINT)
 	@go get -d -t $@
 	@gofmt -w=true $(GOPATH)/src/$@*/**.go
 ifneq ($(NOLINT),1)
 	@echo "LINTING..."
-	@PATH=$(PATH):$(GOPATH)/bin golint $(GOPATH)/src/$@*/**.go
+	@$(GOLINT) $(GOPATH)/src/$@*/**.go
 	@echo ""
 endif
 ifeq ($(COVERAGE),1)
@@ -24,17 +31,8 @@ ifeq ($(COVERAGE),1)
 	@go tool cover -html=$(GOPATH)/src/$@/c.out
 endif
 
-run:
-	@go build
-	./who-is-who
-
-
-SHELL := /bin/bash
-PKGS := $(shell go list ./... | grep -v /vendor)
-GODEP := $(GOPATH)/bin/godep
-
-$(GODEP):
-	go get -u github.com/tools/godep
+run: build
+	bin/$(EXECUTABLE)
 
 vendor: $(GODEP)
 	$(GODEP) save $(PKGS)
