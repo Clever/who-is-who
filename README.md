@@ -82,3 +82,6 @@ The following environment variables must be set to run the API:
 - `DYNAMO_ENDPOINT`
 - `DYNAMO_REGION`
 
+## Vendoring
+
+Please view the [dev-handbook for instructions](https://github.com/Clever/dev-handbook/blob/master/golang/godep.md).
