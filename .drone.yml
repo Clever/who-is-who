@@ -1,3 +1,5 @@
+env:
+- REPORT_CARD_GITHUB_API_TOKEN=$$report_card_github_api_token
 image: clever/drone-go:1.5
 notify:
   email:
@@ -25,5 +27,6 @@ publish:
     when:
       branch: master
 script:
+- pip install -q git+git://github.com/Clever/report-card.git && GITHUB_API_TOKEN=$REPORT_CARD_GITHUB_API_TOKEN report-card --publish
 - make test
 - make build
