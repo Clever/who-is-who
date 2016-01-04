@@ -22,7 +22,8 @@ type AwsService struct{}
 func (a AwsService) Fill(m integrations.UserMap) (integrations.UserMap, error) {
 	for email, user := range m {
 		if user.FirstName != "" && user.LastName != "" {
-			user.AWS = strings.ToLower(user.FirstName[0:1] + user.LastName)
+			lastName := strings.Replace(user.LastName, " ", "", -1)
+			user.AWS = strings.ToLower(user.FirstName[0:1] + lastName)
 		}
 		m[email] = user
 	}
