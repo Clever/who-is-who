@@ -19,10 +19,13 @@ var (
 type AwsService struct{}
 
 // Fill uses the first and last name to form an AWS username.
+// TODO: There will eventually be an awsuser collision. Gotta figure something out...
 func (a AwsService) Fill(m integrations.UserMap) (integrations.UserMap, error) {
 	for email, user := range m {
 		if user.FirstName != "" && user.LastName != "" {
-			lastName := strings.Replace(user.LastName, " ", "", -1)
+			lastName := user.LastName
+			lastName = strings.Replace(lastName, " ", "", -1)
+			lastName = strings.Replace(lastName, "-", "", -1)
 			user.AWS = strings.ToLower(user.FirstName[0:1] + lastName)
 		}
 		m[email] = user

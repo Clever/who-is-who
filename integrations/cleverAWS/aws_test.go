@@ -16,14 +16,22 @@ func TestAWS(t *testing.T) {
 			FirstName: "First Name",
 			LastName:  "Last Name",
 		},
+		"who@car.es2": integrations.User{
+			FirstName: "First Name",
+			LastName:  "Last-Name",
+		},
 	}
 	service := AwsService{}
 
 	userMap, err := service.Fill(userMap)
 	assert.NoError(err)
-	assert.Equal(1, len(userMap))
+	assert.Equal(2, len(userMap))
 
 	user, ok := userMap["who@car.es"]
+	assert.True(ok)
+	assert.Equal("flastname", user.AWS)
+
+	user, ok = userMap["who@car.es2"]
 	assert.True(ok)
 	assert.Equal("flastname", user.AWS)
 }
