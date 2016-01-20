@@ -26,9 +26,24 @@ func NewClient(executor Executor) *Client {
 	return &Client{executor, executor.SchemaExecutor()}
 }
 
+/*
+Client is the primary start point of interaction with Dynago.
+
+Client is concurrency safe, and completely okay to be used in multiple
+threads/goroutines, as are the operations involving chaining on the client.
+*/
 type Client struct {
 	executor       Executor
 	schemaExecutor SchemaExecutor
+}
+
+/*
+Compose a batch get operation.
+
+Batch gets allow you to get up to 100 keys, in parallel, even across multiple tables, in a single operation.
+*/
+func (c *Client) BatchGet() *BatchGet {
+	return &BatchGet{client: c}
 }
 
 /*

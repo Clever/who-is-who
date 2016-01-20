@@ -7,19 +7,19 @@ import (
 	"gopkg.in/underarmour/dynago.v1/internal/codes"
 )
 
-type DynamoErrorConfig struct {
+type ErrorConfig struct {
 	AmazonCode     string
 	ExpectedStatus int
 	MappedError    codes.ErrorCode
 }
 
 // This variable is mostly exposed so that we can document how errors are mapped
-var MappedErrors = []DynamoErrorConfig{
+var MappedErrors = []ErrorConfig{
 	{"ConditionalCheckFailedException", 400, codes.ErrorConditionFailed},
-	{"ResourceNotFoundException", 400, codes.ErrorNotFound},
 	{"InternalFailure", 500, codes.ErrorInternalFailure},
 	{"InternalServerError", 500, codes.ErrorInternalFailure},
 	{"IncompleteSignature", 400, codes.ErrorAuth},
+	{"IncompleteSignatureException", 400, codes.ErrorAuth},
 	{"InvalidParameterCombination", 400, codes.ErrorInvalidParameter},
 	{"InvalidParameterValue", 400, codes.ErrorInvalidParameter},
 	{"InvalidQueryParameter", 400, codes.ErrorInvalidParameter},
@@ -33,8 +33,11 @@ var MappedErrors = []DynamoErrorConfig{
 	{"ProvisionedThroughputExceededException", 400, codes.ErrorThroughputExceeded},
 	{"RequestExpired", 400, codes.ErrorAuth},
 	{"ResourceInUseException", 400, codes.ErrorResourceInUse},
+	{"ResourceNotFoundException", 400, codes.ErrorNotFound},
 	{"ServiceUnavailable", 503, codes.ErrorServiceUnavailable},
+	{"ServiceUnavailableException", 503, codes.ErrorServiceUnavailable},
 	{"ThrottlingException", 400, codes.ErrorThrottling},
+	{"UnrecognizedClientException", 400, codes.ErrorAuth},
 	{"ValidationError", 400, codes.ErrorInvalidParameter},
 	{"ValidationException", 400, codes.ErrorInvalidParameter},
 

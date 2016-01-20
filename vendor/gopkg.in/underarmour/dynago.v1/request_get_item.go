@@ -28,8 +28,9 @@ type GetItem struct {
 }
 
 // Set the ProjectionExpression for this GetItem (which attributes to get)
-func (p GetItem) ProjectionExpression(expression string) *GetItem {
+func (p GetItem) ProjectionExpression(expression string, params ...Params) *GetItem {
 	p.req.ProjectionExpression = expression
+	p.req.paramsHelper(params)
 	return &p
 }
 

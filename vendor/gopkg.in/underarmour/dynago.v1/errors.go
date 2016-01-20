@@ -38,7 +38,7 @@ func (e *Error) parse(input *inputError) {
 	if len(parts) >= 2 {
 		e.Exception = parts[1]
 		if conf, ok := amazonErrorMap[e.Exception]; ok {
-			e.Type = conf.mappedError
+			e.Type = conf.MappedError
 		}
 	}
 }
@@ -83,21 +83,11 @@ const (
 	ErrorTrimmedData     // Attempted to access data older than 24h
 )
 
-type amazonErrorConfig struct {
-	amazonCode     string
-	expectedStatus int
-	mappedError    codes.ErrorCode
-}
-
-var amazonErrors []amazonErrorConfig
-
-var amazonErrorMap map[string]*amazonErrorConfig
+var amazonErrorMap map[string]*dynamodb.ErrorConfig
 
 func init() {
-	amazonErrors = make([]amazonErrorConfig, len(dynamodb.MappedErrors))
-	amazonErrorMap = make(map[string]*amazonErrorConfig, len(amazonErrors))
+	amazonErrorMap = make(map[string]*dynamodb.ErrorConfig, len(dynamodb.MappedErrors))
 	for i, conf := range dynamodb.MappedErrors {
-		amazonErrors[i] = amazonErrorConfig{conf.AmazonCode, conf.ExpectedStatus, conf.MappedError}
-		amazonErrorMap[conf.AmazonCode] = &amazonErrors[i]
+		amazonErrorMap[conf.AmazonCode] = &dynamodb.MappedErrors[i]
 	}
 }

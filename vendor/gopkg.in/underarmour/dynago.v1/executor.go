@@ -16,6 +16,7 @@ the API level, not just the transport level.
 Executor can also optionally return a SchemaExecutor to execute schema actions.
 */
 type Executor interface {
+	BatchGetItem(*BatchGet) (*BatchGetResult, error)
 	BatchWriteItem(*BatchWrite) (*BatchWriteResult, error)
 	DeleteItem(*DeleteItem) (*DeleteItemResult, error)
 	GetItem(*GetItem) (*GetItemResult, error)
@@ -46,7 +47,7 @@ func NewAwsExecutor(endpoint, region, accessKey, secretKey string) *AwsExecutor 
 		Service:   "dynamodb",
 	}
 	requester := &aws.RequestMaker{
-		Endpoint:       endpoint,
+		Endpoint:       aws.FixEndpointUrl(endpoint),
 		Signer:         &signer,
 		BuildError:     buildError,
 		DebugRequests:  Debug.HasFlag(DebugRequests),
