@@ -5,12 +5,13 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
 const DynamoTargetPrefix = "DynamoDB_20120810." // This is the Dynamo API version we support
-var MaxResponseSize int64 = 5 * 1024 * 1024     // 5MB maximum response
-var MaxResponseError = errors.New("Exceeded maximum response size of 5MB")
+var MaxResponseSize int64 = 25 * 1024 * 1024    // 25MB maximum response
+var MaxResponseError = errors.New("Exceeded maximum response size of 25MB")
 
 type Signer interface {
 	SignRequest(*http.Request, []byte)
@@ -83,4 +84,18 @@ func responseBytes(response *http.Response) (output []byte, err error) {
 		}
 	}
 	return
+}
+
+func FixEndpointUrl(endpoint string) string {
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		panic(err)
+	}
+	if u.Path == "" {
+		u.Path = "/"
+	}
+	if u.Scheme == "https" && !strings.Contains(u.Host, ":") {
+		u.Host += ":443"
+	}
+	return u.String()
 }

@@ -13,12 +13,6 @@ type updateItemRequest struct {
 	ReturnValues                ReturnValues `json:",omitempty"`
 }
 
-type updateItemResponse struct {
-	Attributes Document
-	// TODO ConsumedCapacity
-	// TODO ItemCollectionMetrics
-}
-
 func newUpdateItem(client *Client, table string, key Document) *UpdateItem {
 	return &UpdateItem{
 		client: client,

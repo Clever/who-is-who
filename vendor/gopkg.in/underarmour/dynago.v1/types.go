@@ -8,12 +8,19 @@ import (
 	"time"
 )
 
-type StringSet []string
+/*
+A set of binary blobs.
 
-type NumberSet []string
-
+Note that BinarySet doesn't guarantee ordering on retrieval.
+*/
 type BinarySet [][]byte
 
+/*
+Lists represent DynamoDB lists, which are functionally very similar to JSON
+lists.  Like JSON lists, these lists are heterogeneous, which means that the
+elements of the list can be any valid value type, which includes other lists,
+documents, numbers, strings, etc.
+*/
 type List []interface{}
 
 /*
@@ -39,6 +46,16 @@ func (l List) AsDocumentList() ([]Document, error) {
 	return docs, nil
 }
 
+/*
+Represents a number.
+
+DynamoDB returns numbers as a string representation because they have a single
+high-precision number type that can take the place of integers, floats, and
+decimals for the majority of types.
+
+This method has helpers to get the value of this number as one of various
+Golang numeric type.
+*/
 type Number string
 
 func (n Number) IntVal() (int, error) {
@@ -56,6 +73,11 @@ func (n Number) Uint64Val() (uint64, error) {
 func (n Number) FloatVal() (float64, error) {
 	return strconv.ParseFloat(string(n), 64)
 }
+
+/*
+A set of numbers.
+*/
+type NumberSet []string
 
 // Represents an entire document structure composed of keys and dynamo value
 type Document map[string]interface{}
@@ -110,6 +132,7 @@ func (d Document) GetString(key string) string {
 	}
 }
 
+// Helper to get a Number from a document.
 func (d Document) GetNumber(key string) Number {
 	if d[key] != nil {
 		return d[key].(Number)
@@ -118,6 +141,12 @@ func (d Document) GetNumber(key string) Number {
 	}
 }
 
+/*
+Helper to get a key from a document as a StringSet.
+
+If value at key does not exist; returns an empty StringSet.
+If it exists but is not a StringSet, panics.
+*/
 func (d Document) GetStringSet(key string) StringSet {
 	if d[key] != nil {
 		return d[key].(StringSet)
@@ -160,7 +189,7 @@ If the value does not exist in this Document, returns false.
 If the value is the nil interface, also returns false.
 If the value is a bool, returns the value of the bool.
 If the value is a Number, returns true if value is non-zero.
-For any other values, panics
+For any other values, panics.
 */
 func (d Document) GetBool(key string) bool {
 	if v := d[key]; v != nil {
@@ -225,6 +254,16 @@ provide the Params interface.
 type Params interface {
 	AsParams() []Param
 }
+
+/*
+Store a set of strings.
+
+Sets in DynamoDB do not guarantee any ordering, so storing and retrieving a
+StringSet may not give you back the same order you put it in. The main
+advantage of using sets in DynamoDB is using atomic updates with ADD and DELETE
+in your UpdateExpression.
+*/
+type StringSet []string
 
 func isEmptyValue(v reflect.Value) bool {
 	switch v.Kind() {

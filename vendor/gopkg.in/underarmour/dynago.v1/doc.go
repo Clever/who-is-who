@@ -15,8 +15,8 @@ puts, expression post-filtering, and so on to be clearer, because this means
 a conditional put is simply a PutItem with a condition expression tacked on.
 
 	query := client.Query("Table").
-		KeyConditionExpression("Foo = :foo", dynago.Param{":foo", 42}).
-		Limit(40).Desc()
+	    KeyConditionExpression("Foo = :foo", dynago.Param{":foo", 42}).
+	    Limit(40).Desc()
 	result, err := query.Execute()
 
 All the various item-based query actions are evaluated when you call the
@@ -55,9 +55,9 @@ aliases are non-ambiguous in that the former are named e.g. ":foo" and the latte
 So a conditional PutItem might look like:
 
 	client.PutItem(table, item).
-		ConditionExpression("Foo.#n = :fooName").
-		Param("#n", "Name").Param(":fooName", "Bob").
-		Execute()
+	    ConditionExpression("Foo.#n = :fooName").
+	    Param("#n", "Name").Param(":fooName", "Bob").
+	    Execute()
 
 In this case, we only execute the query if the value at document path Foo.Name was the
 string value "Bob". Note we used the "Param" helper for setting both values.

@@ -50,6 +50,10 @@ type MockExecutor struct {
 	GetItemResult *GetItemResult
 	GetItemError  error
 
+	BatchGetItemCalled bool
+	BatchGetItemCall   *MockExecutorCall
+	BatchGetItemResult *BatchGetResult
+
 	BatchWriteItemCalled bool
 	BatchWriteItemCall   *MockExecutorCall
 	BatchWriteItemError  error
@@ -100,6 +104,16 @@ type MockExecutorCall struct {
 	TotalSegments          *int
 
 	BatchWrites BatchWriteTableMap
+	BatchGets   BatchGetTableMap
+}
+
+func (e *MockExecutor) BatchGetItem(batchGet *BatchGet) (*BatchGetResult, error) {
+	e.BatchGetItemCalled = true
+	e.addCall(&e.BatchGetItemCall, MockExecutorCall{
+		Method:    "BatchGetItem",
+		BatchGets: batchGet.buildTableMap(),
+	})
+	return e.BatchGetItemResult, nil
 }
 
 func (e *MockExecutor) BatchWriteItem(batchWrite *BatchWrite) (*BatchWriteResult, error) {

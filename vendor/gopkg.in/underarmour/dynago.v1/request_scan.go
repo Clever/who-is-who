@@ -16,27 +16,39 @@ func newScan(c *Client, table string) *Scan {
 	return &Scan{c, req}
 }
 
+/*
+Set the start key (effectively the offset cursor).
+*/
 func (s Scan) ExclusiveStartKey(key Document) *Scan {
 	s.req.ExclusiveStartKey = key
 	return &s
 }
 
+/*
+Set a filter expression on this scan.
+
+Scans with a FilterExpression may return 0 results due to scanning past
+records which don't match the filter, but still have more results to get.
+*/
 func (s Scan) FilterExpression(expression string, params ...Params) *Scan {
 	s.req.FilterExpression = expression
 	s.req.paramsHelper(params)
 	return &s
 }
 
+// Run this scan on an index of a table.
 func (s Scan) IndexName(name string) *Scan {
 	s.req.IndexName = name
 	return &s
 }
 
+// Maximum number of results to return per call.
 func (s Scan) Limit(limit uint) *Scan {
 	s.req.Limit = limit
 	return &s
 }
 
+// Set which keys are used on this scan.
 func (s Scan) ProjectionExpression(expression string, params ...Params) *Scan {
 	s.req.ProjectionExpression = expression
 	s.req.paramsHelper(params)
@@ -62,6 +74,7 @@ func (s Scan) Select(value Select) *Scan {
 	return &s
 }
 
+// Execute this scan query.
 func (s *Scan) Execute() (*ScanResult, error) {
 	return s.client.executor.Scan(s)
 }
@@ -78,6 +91,11 @@ type ScanResult struct {
 	LastEvaluatedKey Document
 }
 
+/*
+Helper to get the scan query representing the next page of results.
+
+If the scan has a LastEvaluatedKey, returns another Scan. Otherwise, returns nil.
+*/
 func (r *ScanResult) Next() *Scan {
 	if r.LastEvaluatedKey != nil {
 		return r.req.ExclusiveStartKey(r.LastEvaluatedKey)

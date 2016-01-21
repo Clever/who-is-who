@@ -88,11 +88,19 @@ func (q Query) Select(value Select) *Query {
 	return &q
 }
 
-// Return results descending.
-func (q Query) Desc() *Query {
-	forward := false
+/*
+Whether to scan the query index forward (true) or backwards (false).
+
+Defaults to forward (true) if not called.
+*/
+func (q Query) ScanIndexForward(forward bool) *Query {
 	q.req.ScanIndexForward = &forward
 	return &q
+}
+
+// Return results descending. Equivalent to q.ScanIndexForward(false)
+func (q *Query) Desc() *Query {
+	return q.ScanIndexForward(false)
 }
 
 /*
