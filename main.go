@@ -25,7 +25,7 @@ var (
 type m map[string]interface{}
 
 func init() {
-	flag.StringVar(&port, "port", ":80", "specify the HTTP port to listen on")
+	flag.StringVar(&port, "port", ":9080", "specify the HTTP port to listen on")
 	flag.Parse()
 }
 
