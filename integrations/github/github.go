@@ -60,9 +60,15 @@ func (l UserList) Fill(u integrations.UserMap) (integrations.UserMap, error) {
 
 				// add username to user if we find one with a matching email
 				user, exists := u[email]
-				if exists {
+				if exists && user.Github == "" { // Don't override existing github usernames
 					user.Github = *mbr.Login
 					u[email] = user
+				} else if exists {
+					log.Println(kv.FormatLog("who-is-who", kv.Info, "github username exists", m{
+						"existing-github": user.Github,
+						"new-github":      *mbr.Login,
+						"email":           email,
+					}))
 				} else {
 					log.Println(kv.FormatLog("who-is-who", kv.Info, "mismatched email", m{
 						"message": fmt.Sprintf("Found %s email but no user", l.Domain),
