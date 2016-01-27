@@ -32,7 +32,7 @@ ifeq ($(COVERAGE),1)
 endif
 
 run: build
-	bin/$(EXECUTABLE)
+	bin/$(EXECUTABLE) -port=:9080
 
 vendor: $(GODEP)
 	$(GODEP) save $(PKGS)

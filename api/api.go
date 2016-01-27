@@ -135,8 +135,10 @@ func (d DynamoConn) HookUpRouter() *mux.Router {
 		w.Write([]byte("OK")) // 200 status is autoset
 	})
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Printf("%#v\n", r)
-		w.Header().Set("X-Unique-ID", r.Header.Get("X-Unique-ID"))
+		for k := range r.Header {
+			fmt.Println(k)
+		}
+		fmt.Printf("%#v\n", r.Header)
 		w.Write(welcomePageBuffer.Bytes())
 	})
 	return r
