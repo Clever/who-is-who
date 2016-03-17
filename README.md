@@ -75,9 +75,8 @@ It is recommended that you use the [local DynamoDB instance](http://docs.aws.ama
 
 The following environment variables must be set to run the API:
 
-- `DOMAIN` (this is used to filter the list of users in Slack as well as match Github usernames to users)
-- `AWS_ACCESS_KEY`
-- `AWS_SECRET_KEY`
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
 - `DYNAMO_TABLE`
 - `DYNAMO_ENDPOINT`
 - `DYNAMO_REGION`
