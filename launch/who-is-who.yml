@@ -1,7 +1,8 @@
 run:
   type: docker
 resources:
-  cpu: 0.25
+  cpu: 0.01
+  max_mem: 0.01
 env:
 - AWS_ACCESS_KEY_ID
 - AWS_SECRET_ACCESS_KEY
@@ -18,3 +19,4 @@ expose:
 elbs:
   production:
   - who-is-who-service
+team: eng-infra
