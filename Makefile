@@ -7,7 +7,7 @@ PKGS := $(shell go list ./... | grep -v /vendor)
 EXECUTABLE := who-is-who
 .PHONY: test build vendor run
 
-$(eval $(call golang-version-check,1.6))
+$(eval $(call golang-version-check,1.7))
 
 build:
 	go build -o bin/$(EXECUTABLE) $(PKG)
