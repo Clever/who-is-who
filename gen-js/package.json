@@ -1,0 +1,11 @@
+{
+  "name": "who-is-who",
+  "version": "0.1.0",
+  "description": "Discover aliases from one piece of your organization's digital identity",
+  "main": "index.js",
+  "dependencies": {
+    "@clever/discovery": "0.0.8",
+    "opentracing": "^0.11.1",
+    "request": "^2.75.0"
+  }
+}

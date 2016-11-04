@@ -1,0 +1,106 @@
+swagger: '2.0'
+info:
+  title: who-is-who
+  description: Discover aliases from one piece of your organization's digital identity
+  version: 0.1.0
+  x-npm-package: "who-is-who"
+schemes:
+  - http
+produces:
+  - application/json
+paths:
+  /_health:
+    get:
+      operationId: healthCheck
+      description: Checks if the service is healthy
+      responses:
+        200:
+          description: OK response
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /list:
+    get:
+      operationId: list
+      description: Returns info for all user
+      responses:
+        200:
+          description: OK response
+          schema:
+            $ref: '#/definitions/UserList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /alias/{alias_type}/{alias_value}:
+    get:
+      parameters:
+        - name: alias_type
+          in: path
+          type: string
+          required: true
+        - name: alias_value
+          in: path
+          type: string
+          required: true
+      operationId: getUserByAlias
+      description: Returns info for a user based on an alias
+      responses:
+        200:
+          description: OK response
+          schema:
+            $ref: '#/definitions/User'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+definitions:
+  User:
+    type: object
+    required:
+      - first_name
+      - last_name
+      - email
+      - slack
+      - phone
+      - aws
+      - github
+    properties:
+      first_name:
+        type: string
+        description: First name
+      last_name:
+        type: string
+        description: Last name
+      email:
+        type: string
+        description: E-mail address
+      slack:
+        type: string
+        description: Slack username
+      phone:
+        type: string
+        description: Phone number
+      aws:
+        type: string
+        description: AWS username (IAM user)
+      github:
+        type: string
+        description: Github username
+
+  UserList:
+    type: array
+    items:
+      $ref: '#/definitions/User'
+
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string

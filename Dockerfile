@@ -1,4 +1,7 @@
-FROM debian:jessie
-RUN apt-get update && apt-get install -y ca-certificates
-COPY bin/who-is-who  /usr/bin/who-is-who
-CMD ["who-is-who"]
+FROM gliderlabs/alpine:3.3
+
+RUN apk-install ca-certificates
+COPY build/who-is-who /bin/who-is-who
+
+CMD ["/bin/who-is-who", "--addr=0.0.0.0:80"]
+

@@ -1,76 +1,95 @@
 package main
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
-	"os"
 
-	"github.com/Clever/who-is-who/api"
-	"github.com/Clever/who-is-who/integrations"
-	kv "gopkg.in/Clever/kayvee-go.v2"
+	"gopkg.in/Clever/pathio.v3"
+
+	models "github.com/Clever/who-is-who/gen-go/models"
+	"github.com/Clever/who-is-who/gen-go/server"
 )
 
-var (
-	awsKey         string
-	awsSecret      string
-	dynamoTable    string
-	dynamoRegion   string
-	dynamoEndpoint string
-	port           string
-)
-
-// m is a convenience type for using kv.
-type m map[string]interface{}
-
-func init() {
-	flag.StringVar(&port, "port", ":80", "specify the HTTP port to listen on")
-	flag.Parse()
+// Controller implements server.Controller
+type Controller struct {
+	Users models.UserList
 }
 
-// requiredEnv tries to find a value in the environment variables. If a value is not
-// found the program will panaic.
-func requiredEnv(key string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		log.Fatal(kv.FormatLog("who-is-who", kv.Error, "missing env var", m{
-			"var": key,
-		}))
+// HealthCheck returns an error if the application is unhealthy
+func (c *Controller) HealthCheck(ctx context.Context) error {
+	return nil
+}
+
+// GetUserByAlias looks up a user according to an alias (ex: alias_type='email',alias_value='some.user@clever.com')
+func (c *Controller) GetUserByAlias(ctx context.Context, i *models.GetUserByAliasInput) (*models.User, error) {
+	if i == nil {
+		return nil, fmt.Errorf("invalid input")
 	}
-	return value
+
+	switch i.AliasType {
+	// Valid alias types
+	case "slack":
+	case "email":
+	case "github":
+	case "aws":
+		break
+	default:
+		return nil, fmt.Errorf("invalid alias type")
+	}
+	if i.AliasValue == "" {
+		return nil, fmt.Errorf("alias value cannot be empty-string")
+	}
+
+	for _, user := range c.Users {
+		if (i.AliasType == "slack" && *user.SLACK == i.AliasValue) ||
+			(i.AliasType == "email" && *user.Email == i.AliasValue) ||
+			(i.AliasType == "github" && *user.Github == i.AliasValue) ||
+			(i.AliasType == "aws" && *user.Aws == i.AliasValue) {
+			return user, nil
+		}
+	}
+	return nil, fmt.Errorf("No matching user found")
 }
 
-func setupEnvVars() {
-	awsKey = requiredEnv("AWS_ACCESS_KEY_ID")
-	awsSecret = requiredEnv("AWS_SECRET_ACCESS_KEY")
-	dynamoTable = requiredEnv("DYNAMO_TABLE")
-	dynamoRegion = requiredEnv("DYNAMO_REGION")
-	dynamoEndpoint = requiredEnv("DYNAMO_ENDPOINT")
+// List returns all users
+func (c *Controller) List(ctx context.Context) (*models.UserList, error) {
+	return &c.Users, nil
+}
+
+// loadUsers reads a JSON from a local file path or S3 path
+func loadUsers(path string) (models.UserList, error) {
+	reader, err := pathio.Reader(path)
+	if err != nil {
+		return models.UserList{}, err
+	}
+
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(reader)
+
+	var c models.UserList
+	err = json.Unmarshal(buf.Bytes(), &c)
+	if err != nil {
+		return models.UserList{}, err
+	}
+	return c, nil
 }
 
 func main() {
-	setupEnvVars()
+	addr := flag.String("addr", ":8080", "Address to listen at")
+	path := flag.String("users", "./users.json", "Path to file (local or S3) containing users")
+	flag.Parse()
 
-	// setup dynamodb connection
-	c, err := integrations.NewClient(dynamoTable, dynamoEndpoint, dynamoRegion, awsKey, awsSecret)
+	users, err := loadUsers(*path)
 	if err != nil {
-		log.Fatal(kv.FormatLog("who-is-who", kv.Error, "dynamo connection", m{
-			"message": err.Error(),
-		}))
-	}
-	d := api.DynamoConn{
-		Dynamo: c,
+		log.Fatal("Unable to load users:", err.Error())
 	}
 
-	// setup HTTP server
-	log.Println(kv.FormatLog("who-is-who", kv.Info, "server startup", m{
-		"message": fmt.Sprintf("Listening on %s", port),
-	}))
-	err = http.ListenAndServe(port, d.HookUpRouter())
-	if err != nil {
-		log.Fatal(kv.FormatLog("who-is-who", kv.Error, "server startup failure", m{
-			"msg": err.Error(),
-		}))
-	}
+	controller := Controller{Users: users}
+	s := server.New(&controller, *addr)
+	// Serve should not return
+	log.Fatal(s.Serve())
 }

@@ -3,20 +3,14 @@ notify:
   email:
     recipients:
     - drone@clever.com
-  slack:
-    on_failure: true
-    on_started: false
-    on_success: false
-    webhook_url: $$slack_webhook
 publish:
   catapult:
     url: $$catapult_url
-    application: who-is-who
+    application: $$app_name
   docker:
-    docker_version: 1.7.1
     docker_host: $$docker_server
     email: $$docker_email
-    image_name: clever/who-is-who
+    image_name: clever/$$app_name
     password: $$docker_password
     registry_login: true
     tags:
@@ -24,7 +18,15 @@ publish:
     username: $$docker_username
     when:
       branch: master
-  report_card: {}
+  npm:
+    token: $$npm_token
+    folder: gen-js/
+    when:
+      branch: master
+env:
+  - APP_NAME=$$app_name
 script:
+- make install_deps
 - make test
 - make build
+
