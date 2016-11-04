@@ -1,9 +1,9 @@
-swagger: '2.0'
+wagger: '2.0'
 info:
   title: who-is-who
   description: Discover aliases from one piece of your organization's digital identity
   version: 0.1.0
-  x-npm-package: "@clever/who-is-who" # TODO: make public?
+  x-npm-package: "who-is-who"
 schemes:
   - http
 produces:
