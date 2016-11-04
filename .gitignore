@@ -1,18 +1,12 @@
-service-account.json
-*.json
-*.pem
-who-is-who
-updater
+# osx / sshfs
+._*
+.DS_Store
 
-# dynamo crap
-dynamodb_local_latest.tar.gz
-DynamoDBLocal.jar
-DynamoDBLocal_lib/
-LICENSE.txt
-README.txt
-directory/
-third_party_licenses/
+# emacs / vim
+*~
+\#*\#
+.\#*
 
-real_configs.sh
-c.out
-*.db
+vendor
+build
+bin

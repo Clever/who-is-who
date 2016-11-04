@@ -1,22 +1,19 @@
-run:
-  type: docker
-resources:
-  cpu: 0.01
-  max_mem: 0.01
 env:
-- AWS_ACCESS_KEY_ID
-- AWS_SECRET_ACCESS_KEY
-- DYNAMO_TABLE
-- DYNAMO_REGION
-- DYNAMO_ENDPOINT
+- LIGHTSTEP_ACCESS_TOKEN
+resources:
+  cpu: 0.1
+  max_mem: 0.1
+shepherds:
+- "nathan.leiby@clever.com"
 expose:
-- name: http
+- name: default
   port: 80
   bind: 80
   health_check:
     type: http
-    path: /health/check
-elbs:
-  production:
-  - who-is-who-service
-team: eng-infra
+    path: /_health
+- name: pprof
+  port: 6060
+  bind: 6060
+team: "TODO"
+

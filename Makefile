@@ -1,27 +1,34 @@
+include wag.mk
 include golang.mk
-.DEFAULT_GOAL := test # override default goal set in library makefile
 
+.PHONY: all test build run
 SHELL := /bin/bash
-PKG = github.com/Clever/who-is-who
-PKGS := $(shell go list ./... | grep -v /vendor)
-EXECUTABLE := who-is-who
-.PHONY: test build vendor run
+APP_NAME ?= who-is-who
+EXECUTABLE = $(APP_NAME)
+PKG = github.com/Clever/$(APP_NAME)
+PKGS := $(shell go list ./... | grep -v /vendor | grep -v /gen-go)
+
+WAG_VERSION := latest
 
 $(eval $(call golang-version-check,1.7))
 
-build:
-	go build -o bin/$(EXECUTABLE) $(PKG)
+all: test build
 
 test: $(PKGS)
+$(PKGS): golang-test-all-strict-deps
+	$(call golang-test-all-strict,$@)
 
-$(PKGS): golang-test-all-deps
-	$(call golang-fmt,$@)
-	$(call golang-lint,$@)
-	$(call golang-vet,$@)
-	./integration_test.sh $@
-
-vendor: golang-godep-vendor-deps
-	$(call golang-godep-vendor,$(PKGS))
+build:
+	CGO_ENABLED=0 go build -installsuffix cgo -o build/$(EXECUTABLE) $(PKG)
 
 run: build
 	bin/$(EXECUTABLE)
+
+generate: wag-generate-deps
+	$(call wag-generate,./swagger.yml,$(PKG))
+
+$(GOPATH)/bin/glide:
+	@go get github.com/Masterminds/glide
+
+install_deps: $(GOPATH)/bin/glide
+	@$(GOPATH)/bin/glide install -v

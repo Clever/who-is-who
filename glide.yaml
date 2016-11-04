@@ -1,0 +1,8 @@
+package: github.com/Clever/who-is-who
+import:
+- package: github.com/lightstep/lightstep-tracer-go
+  version: f3c66066ce6023ad1bd721cfbd9fbd6292eb08cc
+- package: github.com/opentracing/opentracing-go
+  version: ^0.10.0
+- package: github.com/opentracing/basictracer-go
+  version: c7c0202a8a77f658aeb2193a27b6c0cfcc821038
