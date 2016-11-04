@@ -22,7 +22,7 @@ build:
 	CGO_ENABLED=0 go build -installsuffix cgo -o build/$(EXECUTABLE) $(PKG)
 
 run: build
-	bin/$(EXECUTABLE)
+	build/$(EXECUTABLE)
 
 generate: wag-generate-deps
 	$(call wag-generate,./swagger.yml,$(PKG))

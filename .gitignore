@@ -10,3 +10,6 @@
 vendor
 build
 bin
+
+# who-is-who
+users.json
