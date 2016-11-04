@@ -1,0 +1,97 @@
+hash: 5fbc59df5246214d3121712e7e2f66f720978c40795922611096cca6f32a6192
+updated: 2016-11-04T11:03:42.010561512-07:00
+imports:
+- name: github.com/afex/hystrix-go
+  version: 39520ddd07a9d9a071d615f7476798659f5a3b89
+  subpackages:
+  - hystrix
+  - hystrix/metric_collector
+  - hystrix/rolling
+- name: github.com/asaskevich/govalidator
+  version: 7b3beb6df3c42abd3509abfc3bcacc0fbfb7c877
+- name: github.com/Clever/discovery-go
+  version: 390462cd848840ad55e92fa42f81c67c0feb7d15
+- name: github.com/Clever/go-process-metrics
+  version: f511aded0581f03bd588598f281d236fd246e995
+  subpackages:
+  - metrics
+- name: github.com/donovanhide/eventsource
+  version: fd1de70867126402be23c306e1ce32828455d85b
+- name: github.com/go-errors/errors
+  version: a41850380601eeb43f4350f7d17c6bbd8944aaf8
+- name: github.com/go-openapi/analysis
+  version: 7222828b8ce19afee3c595aef6643b9e42150120
+- name: github.com/go-openapi/errors
+  version: 4178436c9f2430cdd945c50301cfb61563b56573
+- name: github.com/go-openapi/jsonpointer
+  version: 46af16f9f7b149af66e5d1bd010e3574dc06de98
+- name: github.com/go-openapi/jsonreference
+  version: 13c6e3589ad90f49bd3e3bbe2c2cb3d7a4142272
+- name: github.com/go-openapi/loads
+  version: 5861a4879a2866943dce3c644c879af9e59c22a3
+- name: github.com/go-openapi/runtime
+  version: 2faaf90bf67e0616db00094f2141f99b00a9ebc2
+- name: github.com/go-openapi/spec
+  version: d1c18b339aece4b16ead6d253b85b6ad7180ea54
+- name: github.com/go-openapi/strfmt
+  version: d65c7fdb29eca313476e529628176fe17e58c488
+- name: github.com/go-openapi/swag
+  version: 3b6d86cd965820f968760d5d419cb4add096bdd7
+- name: github.com/go-openapi/validate
+  version: 027696d4b54399770f1cdcc6c6daa56975f9e14e
+- name: github.com/golang/mock
+  version: bd3c8e81be01eef76d4b503f5e687d2d1354d2d9
+  subpackages:
+  - gomock
+- name: github.com/gorilla/context
+  version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
+- name: github.com/gorilla/mux
+  version: 757bef944d0f21880861c2dd9c871ca543023cba
+- name: github.com/lightstep/lightstep-tracer-go
+  version: f3c66066ce6023ad1bd721cfbd9fbd6292eb08cc
+- name: github.com/mailru/easyjson
+  version: 159cdb893c982e3d1bc6450322fedd514f9c9de3
+  subpackages:
+  - jlexer
+  - jwriter
+  - buffer
+- name: github.com/opentracing/basictracer-go
+  version: c7c0202a8a77f658aeb2193a27b6c0cfcc821038
+- name: github.com/opentracing/opentracing-go
+  version: ca4c9c0010bd9155b6d067b33865d849fe533628
+- name: github.com/PuerkitoBio/purell
+  version: 8a290539e2e8629dbc4e6bad948158f790ec31f4
+- name: github.com/PuerkitoBio/urlesc
+  version: 5bd2802263f21d8788851d5305584c82a5c75d7e
+- name: golang.org/x/net
+  version: 569280fa63be4e201b975e5411e30a92178f0118
+  subpackages:
+  - context/ctxhttp
+  - context
+  - idna
+- name: golang.org/x/text
+  version: a8b38433e35b65ba247bb267317037dee1b70cea
+  subpackages:
+  - secure/precis
+  - unicode/norm
+  - cases
+  - language
+  - runes
+  - secure/bidirule
+  - transform
+  - width
+  - internal
+  - internal/tag
+  - unicode/bidi
+- name: gopkg.in/Clever/kayvee-go.v3
+  version: 056c92dcc68b40c5d6045f755197b3776f914154
+  subpackages:
+  - logger
+- name: gopkg.in/Clever/kayvee-go.v5
+  version: 865aa5e4bbe8e274c69accd53f0b1e2ecc484cd8
+  subpackages:
+  - logger
+  - middleware
+- name: gopkg.in/tylerb/graceful.v1
+  version: 50a48b6e73fcc75b45e22c05b79629a67c79e938
+testImports: []
