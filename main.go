@@ -8,7 +8,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Clever/pathio"
+	"gopkg.in/Clever/pathio.v3"
+
 	models "github.com/Clever/who-is-who/gen-go/models"
 	"github.com/Clever/who-is-who/gen-go/server"
 )
