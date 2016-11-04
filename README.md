@@ -2,7 +2,7 @@
 
 Discover aliases from one piece of your organization's digital identity
 
-Owned by TODO
+Owned by eng-infra
 
 ## Developing
 
