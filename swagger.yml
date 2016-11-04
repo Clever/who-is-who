@@ -1,4 +1,4 @@
-wagger: '2.0'
+swagger: '2.0'
 info:
   title: who-is-who
   description: Discover aliases from one piece of your organization's digital identity
@@ -67,6 +67,7 @@ definitions:
       - slack
       - phone
       - aws
+      - github
     properties:
       first_name:
         type: string
@@ -86,6 +87,9 @@ definitions:
       aws:
         type: string
         description: AWS username (IAM user)
+      github:
+        type: string
+        description: Github username
 
   UserList:
     type: array
