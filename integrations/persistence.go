@@ -6,7 +6,7 @@ import (
 	"math"
 	"time"
 
-	"gopkg.in/Clever/kayvee-go.v2"
+	"gopkg.in/Clever/kayvee-go.v6"
 	"gopkg.in/underarmour/dynago.v1"
 	"gopkg.in/underarmour/dynago.v1/schema"
 )
