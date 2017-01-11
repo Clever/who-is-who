@@ -20,8 +20,8 @@ $(PKGS): golang-test-all-deps
 	$(call golang-vet,$@)
 	./integration_test.sh $@
 
-vendor: golang-godep-vendor-deps
-	$(call golang-godep-vendor,$(PKGS))
+install_deps: $(GOPATH)/bin/glide
+	@$(GOPATH)/bin/glide install
 
 run: build
 	bin/$(EXECUTABLE)

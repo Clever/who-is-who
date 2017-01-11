@@ -16,3 +16,5 @@ third_party_licenses/
 real_configs.sh
 c.out
 *.db
+
+vendor/

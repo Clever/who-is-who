@@ -1,0 +1,65 @@
+hash: d0eb66c1c0156ef5495a2ee7e70352acb88051b571ccc26e8117815473a91c94
+updated: 2017-01-10T18:13:15.435250538-08:00
+imports:
+- name: github.com/certifi/gocertifi
+  version: a61bf5eafa3aee233ec8043e9da052447e5463dd
+- name: github.com/Clever/kayvee-go
+  version: e66b7125305571d0c126bebd3969f718c42853c5
+- name: github.com/getsentry/raven-go
+  version: b8684db99b339af19aa6f067df3be9de6e995f89
+- name: github.com/golang/protobuf
+  version: 98fa357170587e470c5f27d3c3ea0947b71eb455
+  subpackages:
+  - proto
+- name: github.com/google/go-github
+  version: 58e27d2951882f0b3101ba9d6e0c34a0a49350c6
+  subpackages:
+  - github
+- name: github.com/google/go-querystring
+  version: 9235644dd9e52eeae6fa48efd539fdc351a0af53
+  subpackages:
+  - query
+- name: github.com/gorilla/context
+  version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
+- name: github.com/gorilla/mux
+  version: 757bef944d0f21880861c2dd9c871ca543023cba
+- name: golang.org/x/net
+  version: b336a971b799939dd16ae9b1df8334cb8b977c4d
+  subpackages:
+  - context
+- name: golang.org/x/oauth2
+  version: 25b4fb1468cb89700c7c060cb99f30581a61f5e3
+  subpackages:
+  - internal
+- name: google.golang.org/appengine
+  version: 46239ca616842c00f41b8cbc6bbf2bd6ffbfcdad
+  subpackages:
+  - internal
+  - internal/base
+  - internal/datastore
+  - internal/log
+  - internal/remote_api
+  - internal/urlfetch
+  - urlfetch
+- name: gopkg.in/Clever/kayvee-go.v2
+  version: f22678e173a41725762e243290eca4dd3939b33b
+- name: gopkg.in/underarmour/dynago.v1
+  version: 11c1ecca98bfea8b63c8f5e40822fd6f41a7f67e
+  subpackages:
+  - internal/aws
+  - internal/codes
+  - internal/dynamodb
+  - schema
+testImports:
+- name: github.com/davecgh/go-spew
+  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
+  subpackages:
+  - spew
+- name: github.com/pmezard/go-difflib
+  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
+  subpackages:
+  - difflib
+- name: github.com/stretchr/testify
+  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
+  subpackages:
+  - assert
