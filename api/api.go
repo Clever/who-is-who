@@ -7,12 +7,12 @@ import (
 	"log"
 	"net/http"
 
-	"gopkg.in/Clever/kayvee-go.v6"
 	"github.com/Clever/who-is-who/integrations"
 	"github.com/Clever/who-is-who/integrations/cleverAWS"
 	"github.com/Clever/who-is-who/integrations/github"
 	"github.com/Clever/who-is-who/integrations/slack"
 	"github.com/gorilla/mux"
+	"gopkg.in/Clever/kayvee-go.v6"
 )
 
 var (

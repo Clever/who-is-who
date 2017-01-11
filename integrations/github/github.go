@@ -7,10 +7,10 @@ import (
 	"regexp"
 	"strings"
 
-	"gopkg.in/Clever/kayvee-go.v6"
 	"github.com/Clever/who-is-who/integrations"
 	githubAPI "github.com/google/go-github/github"
 	"golang.org/x/oauth2"
+	"gopkg.in/Clever/kayvee-go.v6"
 	kv "gopkg.in/Clever/kayvee-go.v6"
 )
 
