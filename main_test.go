@@ -6,11 +6,11 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Clever/kayvee-go"
 	"github.com/Clever/who-is-who/api"
 	"github.com/Clever/who-is-who/integrations"
 	"github.com/Clever/who-is-who/whos-who"
 	"github.com/gorilla/mux"
+	"gopkg.in/Clever/kayvee-go.v6"
 )
 
 const (

@@ -7,11 +7,11 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/Clever/kayvee-go"
 	"github.com/Clever/who-is-who/integrations"
 	githubAPI "github.com/google/go-github/github"
 	"golang.org/x/oauth2"
-	kv "gopkg.in/Clever/kayvee-go.v2"
+	"gopkg.in/Clever/kayvee-go.v6"
+	kv "gopkg.in/Clever/kayvee-go.v6"
 )
 
 // m is a convenience type for using kayvee.

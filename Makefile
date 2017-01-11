@@ -9,6 +9,9 @@ EXECUTABLE := who-is-who
 
 $(eval $(call golang-version-check,1.7))
 
+$(GOPATH)/bin/glide:
+	@go get github.com/Masterminds/glide
+
 build:
 	go build -o bin/$(EXECUTABLE) $(PKG)
 
@@ -20,8 +23,8 @@ $(PKGS): golang-test-all-deps
 	$(call golang-vet,$@)
 	./integration_test.sh $@
 
-vendor: golang-godep-vendor-deps
-	$(call golang-godep-vendor,$(PKGS))
+install_deps: $(GOPATH)/bin/glide
+	@$(GOPATH)/bin/glide install
 
 run: build
 	bin/$(EXECUTABLE)

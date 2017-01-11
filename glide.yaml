@@ -1,0 +1,18 @@
+package: github.com/Clever/who-is-who
+import:
+- package: gopkg.in/Clever/kayvee-go.v6
+- package: github.com/google/go-github
+  subpackages:
+  - github
+- package: github.com/gorilla/mux
+- package: golang.org/x/oauth2
+- package: gopkg.in/underarmour/dynago.v1
+  subpackages:
+  - schema
+- package: golang.org/x/crypto
+  subpackages:
+  - ssh/terminal
+testImport:
+- package: github.com/stretchr/testify
+  subpackages:
+  - assert
