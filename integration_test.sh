@@ -5,7 +5,7 @@ jar=DynamoDBLocal.jar
 # download the dynamo jar if necessary
 if [ ! -e "$jar" ]
 then
-	apt-get update && apt-get install -y default-jre
+	sudo apt-get update && sudo apt-get install -y default-jre
 	wget http://dynamodb-local.s3-website-us-west-2.amazonaws.com/dynamodb_local_latest.tar.gz
 	tar -zxvf dynamodb_local_latest.tar.gz
 fi
