@@ -7,13 +7,12 @@ machine:
   - docker
 test:
   override:
-  - npm install
   - make test
   post:
   - npm prune --production
 deployment:
   all:
-    branch: "*"
+    branch: "PASSION-8-who-is-who-too"
     owner: Clever
     commands:
     - $HOME/ci-scripts/circleci/docker-publish $DOCKER_USER $DOCKER_PASS "$DOCKER_EMAIL" $DOCKER_ORG
