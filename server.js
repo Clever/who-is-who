@@ -15,7 +15,7 @@ let tableNameSuffix = process.env.TABLE_NAME_SUFFIX;
 let dynamoReadWriteCapacity = parseInt(process.env.DYNAMO_READ_WRITE_CAPACITY);
 
 const storage = require("./storage/dynamodb")(
-	endpoint, region, accessKeyId, secretAccessKey, tableNameSuffix, dynamoReadWriteCapacity,
+	endpoint, region, accessKeyId, secretAccessKey, tableNameSuffix, dynamoReadWriteCapacity
 );
 const db = require("./db")(storage);
 const router = require("./router")(db);
