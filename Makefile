@@ -11,7 +11,7 @@ lint:
 	./node_modules/.bin/eslint $(JS_FILES)
 
 format:
-	./node_modules/.bin/prettier --bracket-spacing false --single-quote --write $(JS_FILES)
+	./node_modules/.bin/prettier --bracket-spacing false --write $(JS_FILES)
 	./node_modules/.bin/eslint --fix $(JS_FILES)
 
 run: lint
