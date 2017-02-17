@@ -1,0 +1,21 @@
+run:
+  type: docker
+env:
+- PORT
+- AWS_DYNAMO_ENDPOINT
+- AWS_DYNAMO_REGION
+- AWS_ACCESS_KEY_ID
+- AWS_SECRET_ACCESS_KEY
+- TABLE_NAME_SUFFIX
+resources:
+  cpu: 0.1
+  max_mem: 0.1
+expose:
+- name: default
+  port: 80
+  health_check:
+    type: http
+    path: /health
+shepherds:
+- "xavi.ramirez@clever.com"
+team: "eng-infra"
