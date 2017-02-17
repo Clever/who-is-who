@@ -198,10 +198,14 @@ function createWorkingExport(endpoint, region, accessId, secretKey) {
 	};
 }
 
-module.exports = function(endpoint, region, accessId, secretKey, tableNameSuffix) {
+module.exports = function(endpoint, region, accessId, secretKey, tableNameSuffix, readWriteCapacity) {
 	objTable.TableName += tableNameSuffix || "";
 	pathTable.TableName += tableNameSuffix || "";
 	histTable.TableName += tableNameSuffix || "";
+
+	objTable.ProvisionedThroughput = { ReadCapacityUnits: readWriteCapacity, WriteCapacityUnits: readWriteCapacity };
+	pathTable.ProvisionedThroughput = { ReadCapacityUnits: readWriteCapacity, WriteCapacityUnits: readWriteCapacity };
+	histTable.ProvisionedThroughput = { ReadCapacityUnits: readWriteCapacity, WriteCapacityUnits: readWriteCapacity };
 
 	let pending = [];
 	let waitForCreate = (thunk) => { pending.push(thunk); };

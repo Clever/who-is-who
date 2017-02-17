@@ -12,9 +12,10 @@ let region = process.env.AWS_DYNAMO_REGION || "us-west-1";
 let accessKeyId = process.env.AWS_ACCESS_KEY_ID;
 let secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
 let tableNameSuffix = process.env.TABLE_NAME_SUFFIX;
+let dynamoReadWriteCapacity = parseInt(process.env.DYNAMO_READ_WRITE_CAPACITY);
 
 const storage = require("./storage/dynamodb")(
-	endpoint, region, accessKeyId, secretAccessKey, tableNameSuffix
+	endpoint, region, accessKeyId, secretAccessKey, tableNameSuffix, dynamoReadWriteCapacity,
 );
 const db = require("./db")(storage);
 const router = require("./router")(db);
