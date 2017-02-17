@@ -13,7 +13,7 @@ test:
   - npm prune --production
 deployment:
   all:
-    branch: master
+    branch: "*"
     owner: Clever
     commands:
     - $HOME/ci-scripts/circleci/docker-publish $DOCKER_USER $DOCKER_PASS "$DOCKER_EMAIL" $DOCKER_ORG
