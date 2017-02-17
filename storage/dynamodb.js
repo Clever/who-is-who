@@ -203,6 +203,10 @@ module.exports = function(endpoint, region, accessId, secretKey, tableNameSuffix
 	pathTable.TableName += tableNameSuffix || "";
 	histTable.TableName += tableNameSuffix || "";
 
+	if (!Number.isInteger(readWriteCapacity)) {
+		throw "Invalid dynamo read/write capacity: " + readWriteCapacity;
+	}
+
 	objTable.ProvisionedThroughput = { ReadCapacityUnits: readWriteCapacity, WriteCapacityUnits: readWriteCapacity };
 	pathTable.ProvisionedThroughput = { ReadCapacityUnits: readWriteCapacity, WriteCapacityUnits: readWriteCapacity };
 	histTable.ProvisionedThroughput = { ReadCapacityUnits: readWriteCapacity, WriteCapacityUnits: readWriteCapacity };
