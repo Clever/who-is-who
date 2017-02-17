@@ -20,7 +20,7 @@ function toPaths(obj) {
 	let paths = {};
 	let node, nodes = [{path: "", obj: obj}];
 
-	while (node = nodes.pop()) {
+	while ((node = nodes.pop()) != undefined) {
 		let obj = node.obj, path = node.path;
 
 		if (!_.isPlainObject(obj)) {
@@ -81,7 +81,7 @@ function removeEmptyValues(obj) {
 	obj = _.cloneDeep(obj);
 
 	let node, nodes = [obj];
-	while (node = nodes.pop()) {
+	while ((node = nodes.pop()) != undefined) {
 		Object.keys(node).forEach(key => {
 			if (node[key] === "" || _.isNil(node[key])) {
 				delete node[key];
