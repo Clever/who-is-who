@@ -4,7 +4,7 @@ const async = require("async");
 const _ = require("lodash");
 const kv = require("kayvee");
 
-const log = new kv.logger("who-is-who-too");
+const log = new kv.logger("who-is-who");
 
 const objTable = {
 	TableName: "whoswho-objects",

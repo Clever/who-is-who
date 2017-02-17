@@ -1,4 +1,4 @@
-# who is who too
+# who is who
 
 A service that knits together user identities from various sources
 

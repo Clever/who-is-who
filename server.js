@@ -3,7 +3,7 @@ const bodyParser = require("body-parser");
 
 const kv = require("kayvee");
 
-const log = new kv.logger("who-is-who-too");
+const log = new kv.logger("who-is-who");
 
 let port = process.env.PORT || "80";
 
@@ -21,7 +21,7 @@ const router = require("./router")(db);
 
 let app = express();
 
-app.use(kv.middleware({ source: "who-is-who-too" }));
+app.use(kv.middleware({ source: "who-is-who" }));
 app.use(bodyParser.json());
 
 app.use(router).listen(port);
