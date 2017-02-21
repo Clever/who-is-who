@@ -1,7 +1,7 @@
 rules:
   indent:
     - warn
-    - tab
+    - 2
   quotes:
     - error
     - double
