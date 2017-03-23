@@ -16,4 +16,4 @@ format:
 
 run: lint
 	docker build -t who-is-who .
-	@docker run -p 8080:80 --env-file=<(echo -e $(_ARKLOC_ENV_FILE)) who-is-who
+	@docker run -p 8081:80 --env-file=<(echo -e $(_ARKLOC_ENV_FILE)) who-is-who
