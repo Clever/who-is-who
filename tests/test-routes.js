@@ -276,13 +276,13 @@ exports["/alias/`key`/`value`"] = {
 
     let data = {
       deepish: {cheggit: "", num: 0, bool: false},
-      email: "5@mail.com"
+      email: "325@mail.com"
     };
     mockPOST("/alias/bye/5", data, (res, data) => {
       test.equal(res.statusCode, 200);
       test.deepEqual(data, {
         bye: 5,
-        email: "5@mail.com",
+        email: "325@mail.com",
         deepish: {num: 0, bool: false}
       });
       test.done();
@@ -291,32 +291,32 @@ exports["/alias/`key`/`value`"] = {
   "POST, PUT with null values": test => {
     test.expect(2);
 
-    let data = {cheggit: null, email: "5@mail.com"};
+    let data = {cheggit: null, email: "538@mail.com"};
     mockPOST("/alias/bye/6", data, (res, data) => {
       test.equal(res.statusCode, 200);
-      test.deepEqual(data, {bye: 6, email: "5@mail.com"});
+      test.deepEqual(data, {bye: 6, email: "538@mail.com"});
       test.done();
     });
   },
   "POST, PUT with deep null values": test => {
     test.expect(2);
 
-    let data = {deepish: {cheggit: null}, email: "5@mail.com"};
+    let data = {deepish: {cheggit: null}, email: "0935@mail.com"};
     mockPOST("/alias/bye/7", data, (res, data) => {
       test.equal(res.statusCode, 200);
-      test.deepEqual(data, {bye: 7, email: "5@mail.com", deepish: {}});
+      test.deepEqual(data, {bye: 7, email: "0935@mail.com", deepish: {}});
       test.done();
     });
   },
   "POST, PUT new value": test => {
     test.expect(7);
 
-    mockPOST("/alias/bye/2", {cheggit: "yo", email: "5@mail.com"}, (
+    mockPOST("/alias/bye/2", {cheggit: "yo", email: "745@mail.com"}, (
       res,
       data
     ) => {
       test.equal(res.statusCode, 200);
-      test.deepEqual(data, {bye: 2, cheggit: "yo", email: "5@mail.com"});
+      test.deepEqual(data, {bye: 2, cheggit: "yo", email: "745@mail.com"});
 
       mockGET("/alias/bye/2/history/", (res, data) => {
         test.equal(res.statusCode, 200);
@@ -328,7 +328,7 @@ exports["/alias/`key`/`value`"] = {
           {created: true, cur: "yo", author: "mock-post"}
         ]);
         test.deepEqual(data["email"].map(o => _.omit(o, "date")), [
-          {created: true, cur: "5@mail.com", author: "mock-post"}
+          {created: true, cur: "745@mail.com", author: "mock-post"}
         ]);
         test.done();
       });
