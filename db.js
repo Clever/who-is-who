@@ -163,11 +163,19 @@ module.exports = function(storage) {
           return cb(err);
         }
 
+        // Before creating a new object, try to find pre-existing object using email prop.
+        // Should be effective since all new objects must have an email prop.
+        if(obj == null && key !== "email") {
+          body = _.set(body, key, val); // Here so key/val pair isn't lost
+
+          return this.put(author, "email", body["email"], body, cb);
+        }
+
         let prev = obj || {_whoid: uuid()};
         let cur = _.defaultsDeep({}, body, prev);
-        cur = _.set(cur, key, val); // Here to ensure new values have the correct index
-
         cur = removeEmptyValues(cur); // Don't save empty values
+
+        if(key === "email") { cur.email = val; }
 
         if (!cur.email) {
           return cb(UserError("Can't save.  No email address found."));

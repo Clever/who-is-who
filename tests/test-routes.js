@@ -360,6 +360,46 @@ exports["/alias/`key`/`value`"] = {
       });
     });
   },
+  "POST, PUT objects with the same email address are merged": test => {
+    test.expect(11);
+
+    mockPOST("/alias/email/peep@peep.com", {cheggit: "yo"}, (res, data) => {
+      test.equal(res.statusCode, 200);
+      test.deepEqual(data, {cheggit: "yo", email: "peep@peep.com"});
+
+
+      mockPOST("/alias/slack/peep", {orto: "next", "email": "peep@peep.com"}, (res, data) => {
+        test.equal(res.statusCode, 200);
+        test.deepEqual(data, {
+          cheggit: "yo", orto: "next", email: "peep@peep.com", slack: "peep"
+        });
+
+        mockGET("/alias/email/peep@peep.com", (res, data) => {
+          test.equal(res.statusCode, 200);
+          test.deepEqual(data, {
+            cheggit: "yo", orto: "next", email: "peep@peep.com", slack: "peep"
+          });
+
+          mockGET("/alias/email/peep@peep.com/history/", (res, data) => {
+            test.equal(Object.keys(data).length, 4);
+            test.deepEqual(data["orto"].map(o => _.omit(o, "date")), [
+              {created: true, cur: "next", author: "mock-post"}
+            ]);
+            test.deepEqual(data["cheggit"].map(o => _.omit(o, "date")), [
+              {created: true, cur: "yo", author: "mock-post"}
+            ]);
+            test.deepEqual(data["email"].map(o => _.omit(o, "date")), [
+              {created: true, cur: "peep@peep.com", author: "mock-post"}
+            ]);
+            test.deepEqual(data["slack"].map(o => _.omit(o, "date")), [
+              {created: true, cur: "peep", author: "mock-post"}
+            ]);
+            test.done();
+          });
+        });
+      });
+    });
+  },
   "POST, PUT existing value": test => {
     test.expect(7);
 
