@@ -400,6 +400,30 @@ exports["/alias/`key`/`value`"] = {
       });
     });
   },
+  "POST, PUT editting email address works": test => {
+    test.expect(7);
+
+    mockPOST("/alias/email/poop@poop.com", {slack: "poop"}, (res, data) => {
+      test.equal(res.statusCode, 200);
+      test.deepEqual(data, {slack: "poop", email: "poop@poop.com"});
+
+      mockPOST("/alias/slack/poop", {"email": "poop2@poop.com"}, (res, data) => {
+        test.equal(res.statusCode, 200);
+        test.deepEqual(data, { email: "poop2@poop.com", slack: "poop" });
+
+        mockGET("/alias/email/poop@poop.com", (res, data) => {
+          test.equal(res.statusCode, 404);
+
+          mockGET("/alias/email/poop2@poop.com", (res, data) => {
+            test.equal(res.statusCode, 200);
+            test.deepEqual(data, { email: "poop2@poop.com", slack: "poop" });
+
+            test.done();
+          });
+        });
+      });
+    });
+  },
   "POST, PUT existing value": test => {
     test.expect(7);
 
