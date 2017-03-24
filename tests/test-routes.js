@@ -276,13 +276,13 @@ exports["/alias/`key`/`value`"] = {
 
     let data = {
       deepish: {cheggit: "", num: 0, bool: false},
-      email: "5@mail.com"
+      email: "325@mail.com"
     };
     mockPOST("/alias/bye/5", data, (res, data) => {
       test.equal(res.statusCode, 200);
       test.deepEqual(data, {
         bye: 5,
-        email: "5@mail.com",
+        email: "325@mail.com",
         deepish: {num: 0, bool: false}
       });
       test.done();
@@ -291,32 +291,32 @@ exports["/alias/`key`/`value`"] = {
   "POST, PUT with null values": test => {
     test.expect(2);
 
-    let data = {cheggit: null, email: "5@mail.com"};
+    let data = {cheggit: null, email: "538@mail.com"};
     mockPOST("/alias/bye/6", data, (res, data) => {
       test.equal(res.statusCode, 200);
-      test.deepEqual(data, {bye: 6, email: "5@mail.com"});
+      test.deepEqual(data, {bye: 6, email: "538@mail.com"});
       test.done();
     });
   },
   "POST, PUT with deep null values": test => {
     test.expect(2);
 
-    let data = {deepish: {cheggit: null}, email: "5@mail.com"};
+    let data = {deepish: {cheggit: null}, email: "0935@mail.com"};
     mockPOST("/alias/bye/7", data, (res, data) => {
       test.equal(res.statusCode, 200);
-      test.deepEqual(data, {bye: 7, email: "5@mail.com", deepish: {}});
+      test.deepEqual(data, {bye: 7, email: "0935@mail.com", deepish: {}});
       test.done();
     });
   },
   "POST, PUT new value": test => {
     test.expect(7);
 
-    mockPOST("/alias/bye/2", {cheggit: "yo", email: "5@mail.com"}, (
+    mockPOST("/alias/bye/2", {cheggit: "yo", email: "745@mail.com"}, (
       res,
       data
     ) => {
       test.equal(res.statusCode, 200);
-      test.deepEqual(data, {bye: 2, cheggit: "yo", email: "5@mail.com"});
+      test.deepEqual(data, {bye: 2, cheggit: "yo", email: "745@mail.com"});
 
       mockGET("/alias/bye/2/history/", (res, data) => {
         test.equal(res.statusCode, 200);
@@ -328,7 +328,7 @@ exports["/alias/`key`/`value`"] = {
           {created: true, cur: "yo", author: "mock-post"}
         ]);
         test.deepEqual(data["email"].map(o => _.omit(o, "date")), [
-          {created: true, cur: "5@mail.com", author: "mock-post"}
+          {created: true, cur: "745@mail.com", author: "mock-post"}
         ]);
         test.done();
       });
@@ -357,6 +357,70 @@ exports["/alias/`key`/`value`"] = {
           {created: true, cur: "yo", author: "mock-post"}
         ]);
         test.done();
+      });
+    });
+  },
+  "POST, PUT objects with the same email address are merged": test => {
+    test.expect(11);
+
+    mockPOST("/alias/email/peep@peep.com", {cheggit: "yo"}, (res, data) => {
+      test.equal(res.statusCode, 200);
+      test.deepEqual(data, {cheggit: "yo", email: "peep@peep.com"});
+
+
+      mockPOST("/alias/slack/peep", {orto: "next", "email": "peep@peep.com"}, (res, data) => {
+        test.equal(res.statusCode, 200);
+        test.deepEqual(data, {
+          cheggit: "yo", orto: "next", email: "peep@peep.com", slack: "peep"
+        });
+
+        mockGET("/alias/email/peep@peep.com", (res, data) => {
+          test.equal(res.statusCode, 200);
+          test.deepEqual(data, {
+            cheggit: "yo", orto: "next", email: "peep@peep.com", slack: "peep"
+          });
+
+          mockGET("/alias/email/peep@peep.com/history/", (res, data) => {
+            test.equal(Object.keys(data).length, 4);
+            test.deepEqual(data["orto"].map(o => _.omit(o, "date")), [
+              {created: true, cur: "next", author: "mock-post"}
+            ]);
+            test.deepEqual(data["cheggit"].map(o => _.omit(o, "date")), [
+              {created: true, cur: "yo", author: "mock-post"}
+            ]);
+            test.deepEqual(data["email"].map(o => _.omit(o, "date")), [
+              {created: true, cur: "peep@peep.com", author: "mock-post"}
+            ]);
+            test.deepEqual(data["slack"].map(o => _.omit(o, "date")), [
+              {created: true, cur: "peep", author: "mock-post"}
+            ]);
+            test.done();
+          });
+        });
+      });
+    });
+  },
+  "POST, PUT editting email address works": test => {
+    test.expect(7);
+
+    mockPOST("/alias/email/poop@poop.com", {slack: "poop"}, (res, data) => {
+      test.equal(res.statusCode, 200);
+      test.deepEqual(data, {slack: "poop", email: "poop@poop.com"});
+
+      mockPOST("/alias/slack/poop", {"email": "poop2@poop.com"}, (res, data) => {
+        test.equal(res.statusCode, 200);
+        test.deepEqual(data, { email: "poop2@poop.com", slack: "poop" });
+
+        mockGET("/alias/email/poop@poop.com", (res, data) => {
+          test.equal(res.statusCode, 404);
+
+          mockGET("/alias/email/poop2@poop.com", (res, data) => {
+            test.equal(res.statusCode, 200);
+            test.deepEqual(data, { email: "poop2@poop.com", slack: "poop" });
+
+            test.done();
+          });
+        });
       });
     });
   },
