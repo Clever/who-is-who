@@ -401,7 +401,7 @@ exports["/alias/`key`/`value`"] = {
     });
   },
   "POST, PUT editting email address works": test => {
-    test.expect(7);
+    test.expect(8);
 
     mockPOST("/alias/email/poop@poop.com", {slack: "poop"}, (res, data) => {
       test.equal(res.statusCode, 200);
@@ -413,6 +413,7 @@ exports["/alias/`key`/`value`"] = {
 
         mockGET("/alias/email/poop@poop.com", (res, data) => {
           test.equal(res.statusCode, 404);
+          test.ok(data["error"]);
 
           mockGET("/alias/email/poop2@poop.com", (res, data) => {
             test.equal(res.statusCode, 200);
