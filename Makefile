@@ -10,6 +10,9 @@ test: lint
 lint:
 	./node_modules/.bin/eslint $(JS_FILES)
 
+sync:
+	node ./scripts/sync-users.js
+
 format:
 	./node_modules/.bin/prettier --bracket-spacing false --write $(JS_FILES)
 	./node_modules/.bin/eslint --fix $(JS_FILES)
