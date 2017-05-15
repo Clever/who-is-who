@@ -12,9 +12,15 @@ test:
   post:
   - npm prune --production
 deployment:
-  all:
-    branch: "master"
+  master:
     owner: Clever
     commands:
     - $HOME/ci-scripts/circleci/docker-publish $DOCKER_USER $DOCKER_PASS "$DOCKER_EMAIL" $DOCKER_ORG
     - $HOME/ci-scripts/circleci/catapult-publish $CATAPULT_URL $CATAPULT_USER $CATAPULT_PASS who-is-who
+    branch: master
+  non-master:
+    owner: Clever
+    commands:
+    - $HOME/ci-scripts/circleci/docker-publish $DOCKER_USER $DOCKER_PASS "$DOCKER_EMAIL" $DOCKER_ORG
+    - $HOME/ci-scripts/circleci/catapult-publish $CATAPULT_URL $CATAPULT_USER $CATAPULT_PASS who-is-who
+    branch: /^(?!master$).*$/
