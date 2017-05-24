@@ -108,7 +108,7 @@ function listUsers(auth) {
     } else {
       db.all((err, data) => {
         const googleEmails = users.filter(x => x.orgUnitPath == "/FTEs").map(u => u.primaryEmail);
-        let activeWhoIsWho = data.filter(u => u.active).map(u => u.email);
+        let activeWhoIsWho = data.filter(u => u.active);
         let inSync = true;
         for (const googleEmail of googleEmails) {
           const whoIsWho = data.filter(u => u.email == googleEmail);
@@ -118,7 +118,7 @@ function listUsers(auth) {
           } else {
             const employee = whoIsWho[0];
             if (employee.active) {
-              activeWhoIsWho = activeWhoIsWho.filter(email => email !== googleEmail);
+              activeWhoIsWho = activeWhoIsWho.filter(u => u.email !== googleEmail);
             } else {
               inSync = false;
               console.log("Not marked active, should be: " + googleEmail);
@@ -133,7 +133,7 @@ function listUsers(auth) {
         }
         for (const employee of activeWhoIsWho) {
           inSync = false;
-          console.log("Marked active, should not be: " + employee);
+          console.log("Marked active, should not be: " + employee.email);
           employee.active = false;
           db.put("sync-users-script", "email", employee.email, employee, (err) => {
             if (err) {
