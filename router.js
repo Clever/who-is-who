@@ -34,7 +34,13 @@ function genericResponder(res) {
 module.exports = function(db) {
   return bee.route({
     "/health": (req, res) => {
-      res.json({ok: true});
+      setTimeout(function() {
+        if(Math.random() < 0.5) {
+          res.status(500).json({ "poop": "💩" });
+        } else {
+          res.status(200).json({ "poop": "💩" });
+        }
+      }, 4000);
     },
     "/alias /all /list": {
       GET: (req, res) => {
