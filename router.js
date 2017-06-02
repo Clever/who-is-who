@@ -35,7 +35,7 @@ module.exports = function(db) {
   return bee.route({
     "/health": (req, res) => {
       setTimeout(function() {
-        if(Math.random() < 0.5) {
+        if(Math.random() < 0.8) {
           res.status(500).json({ "poop": "💩" });
         } else {
           res.status(200).json({ "poop": "💩" });
