@@ -112,23 +112,24 @@ function listUsers(auth) {
         let inSync = true;
         for (const googleEmail of googleEmails) {
           const whoIsWho = data.filter(u => u.email == googleEmail);
+          let employee = {};
           if (whoIsWho.length != 1) {
             console.log("Missing who is who for: " + googleEmail);
-            return;
+            employee = { email: googleEmail };
           } else {
-            const employee = whoIsWho[0];
-            if (employee.active) {
-              activeWhoIsWho = activeWhoIsWho.filter(u => u.email !== googleEmail);
-            } else {
-              inSync = false;
-              console.log("Not marked active, should be: " + googleEmail);
-              employee.active = true;
-              db.put("sync-users-script", "email", employee.email, employee, (err) => {
-                if (err) {
-                  console.log("Error updating user (" + employee.email + "): " + err);
-                }
-              });
-            }
+            employee = whoIsWho[0];
+          }
+          if (employee.active) {
+            activeWhoIsWho = activeWhoIsWho.filter(u => u.email !== googleEmail);
+          } else {
+            inSync = false;
+            console.log("Not marked active, should be: " + googleEmail);
+            employee.active = true;
+            db.put("sync-users-script", "email", employee.email, employee, (err) => {
+              if (err) {
+                console.log("Error updating user (" + employee.email + "): " + err);
+              }
+            });
           }
         }
         for (const employee of activeWhoIsWho) {
