@@ -9,8 +9,9 @@ env:
 - TABLE_NAME_SUFFIX
 - DYNAMO_READ_WRITE_CAPACITY
 resources:
-  cpu: 0.1
-  max_mem: 0.1
+  cpu: 0.01
+  max_mem: 0.25
+  soft_mem_limit: 0.0625
 expose:
 - name: default
   port: 80
