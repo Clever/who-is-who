@@ -16,7 +16,7 @@ expose:
 - name: "default"
   port: 80
   health_check:
-    type: http
+    type: "http"
     path: "/health"
 shepherds:
 - "xavi.ramirez@clever.com"
