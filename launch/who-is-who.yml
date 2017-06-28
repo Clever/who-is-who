@@ -13,11 +13,11 @@ resources:
   max_mem: 0.25
   soft_mem_limit: 0.0625
 expose:
-- name: default
+- name: "default"
   port: 80
   health_check:
     type: http
-    path: /health
+    path: "/health"
 shepherds:
 - "xavi.ramirez@clever.com"
 team: "eng-infra"
