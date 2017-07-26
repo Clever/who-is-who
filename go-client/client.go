@@ -1,6 +1,7 @@
 package whoswho
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -45,6 +46,33 @@ func (c Client) GetUserList() ([]User, error) {
 	return users, nil
 }
 
+// AddUser makes a POST request to /alias/email/<email>
+func (c Client) AddUser(userInfo User) (User, error) {
+	// marshal given userInfo User struct into JSON
+	userInfoJson, err := json.Marshal(userInfo)
+	email := userInfo.Email
+	if err != nil {
+		return User{}, fmt.Errorf("json marshaling failed => {%s}", err)
+	}
+	userInfoBuffer := bytes.NewBuffer(userInfoJson)
+
+	// create a custom net/http client to set required headers
+	httpClient := &http.Client{}
+	req, err := http.NewRequest("POST", c.endpoint+fmt.Sprintf("/alias/email/%s", email), userInfoBuffer)
+	req.Header.Add("X-WIW-Author", "mock-post")
+	req.Header.Add("Content-Type", "application/json")
+
+	// send request
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return User{}, fmt.Errorf("add user call failed with email %s => {%s}", email, err)
+	}
+
+	// handle 400+ errors and decode json
+	return returnUser(resp)
+
+}
+
 // UserByAWS finds a user based on their AWS username.
 func (c Client) UserByAWS(username string) (User, error) {
 	resp, err := http.Get(c.endpoint + fmt.Sprintf("/alias/aws/%s", username))
@@ -71,7 +99,6 @@ func (c Client) UserBySlack(username string) (User, error) {
 	if err != nil {
 		return User{}, fmt.Errorf("slack alias match call failed => {%s}", err)
 	}
-
 	return returnUser(resp)
 }
 
