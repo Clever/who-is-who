@@ -1,6 +1,7 @@
 package whoswho
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -45,6 +46,29 @@ func (c Client) GetUserList() ([]User, error) {
 	return users, nil
 }
 
+// UpsertUser makes a PUT request to /alias/email/<email>, creates or updates the user, and returns the user
+func (c Client) UpsertUser(author string, userInfo User) (User, error) {
+	userInfoJson, err := json.Marshal(userInfo)
+	email := userInfo.Email
+	if err != nil {
+		return User{}, fmt.Errorf("json marshaling failed => {%s}", err)
+	}
+	userInfoBuffer := bytes.NewBuffer(userInfoJson)
+
+	httpClient := &http.Client{}
+	req, err := http.NewRequest("PUT", c.endpoint+fmt.Sprintf("/alias/email/%s", email), userInfoBuffer)
+	req.Header.Add("X-WIW-Author", author)
+	req.Header.Add("Content-Type", "application/json")
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return User{}, fmt.Errorf("add user call failed with email %s => {%s}", email, err)
+	}
+
+	return returnUser(resp)
+
+}
+
 // UserByAWS finds a user based on their AWS username.
 func (c Client) UserByAWS(username string) (User, error) {
 	resp, err := http.Get(c.endpoint + fmt.Sprintf("/alias/aws/%s", username))
@@ -71,7 +95,6 @@ func (c Client) UserBySlack(username string) (User, error) {
 	if err != nil {
 		return User{}, fmt.Errorf("slack alias match call failed => {%s}", err)
 	}
-
 	return returnUser(resp)
 }
 
