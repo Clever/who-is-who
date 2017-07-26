@@ -46,8 +46,8 @@ func (c Client) GetUserList() ([]User, error) {
 	return users, nil
 }
 
-// AddUser makes a POST request to /alias/email/<email>
-func (c Client) AddUser(author string, userInfo User) (User, error) {
+// AddUser makes a PUT request to /alias/email/<email>, creates or updates the user, and returns the user
+func (c Client) UpsertUser(author string, userInfo User) (User, error) {
 	// marshal given userInfo User struct into JSON
 	userInfoJson, err := json.Marshal(userInfo)
 	email := userInfo.Email
@@ -58,7 +58,7 @@ func (c Client) AddUser(author string, userInfo User) (User, error) {
 
 	// create a custom net/http client to set required headers
 	httpClient := &http.Client{}
-	req, err := http.NewRequest("POST", c.endpoint+fmt.Sprintf("/alias/email/%s", email), userInfoBuffer)
+	req, err := http.NewRequest("PUT", c.endpoint+fmt.Sprintf("/alias/email/%s", email), userInfoBuffer)
 	req.Header.Add("X-WIW-Author", author)
 	req.Header.Add("Content-Type", "application/json")
 
