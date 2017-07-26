@@ -46,9 +46,8 @@ func (c Client) GetUserList() ([]User, error) {
 	return users, nil
 }
 
-// AddUser makes a PUT request to /alias/email/<email>, creates or updates the user, and returns the user
+// UpsertUser makes a PUT request to /alias/email/<email>, creates or updates the user, and returns the user
 func (c Client) UpsertUser(author string, userInfo User) (User, error) {
-	// marshal given userInfo User struct into JSON
 	userInfoJson, err := json.Marshal(userInfo)
 	email := userInfo.Email
 	if err != nil {
@@ -56,19 +55,16 @@ func (c Client) UpsertUser(author string, userInfo User) (User, error) {
 	}
 	userInfoBuffer := bytes.NewBuffer(userInfoJson)
 
-	// create a custom net/http client to set required headers
 	httpClient := &http.Client{}
 	req, err := http.NewRequest("PUT", c.endpoint+fmt.Sprintf("/alias/email/%s", email), userInfoBuffer)
 	req.Header.Add("X-WIW-Author", author)
 	req.Header.Add("Content-Type", "application/json")
 
-	// send request
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return User{}, fmt.Errorf("add user call failed with email %s => {%s}", email, err)
 	}
 
-	// handle 400+ errors and decode json
 	return returnUser(resp)
 
 }
