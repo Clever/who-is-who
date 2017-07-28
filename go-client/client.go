@@ -25,6 +25,7 @@ type User struct {
 	Email     string `json:"email"`            // Slack
 	Slack     string `json:"slack"`            // Slack
 	Phone     string `json:"phone"`            // Slack
+	SlackId   string `json:"slack_id"`         // Slack
 	AWS       string `json:"aws"`              // first initial + last name
 	Github    string `json:"github,omitempty"` // Github
 }
