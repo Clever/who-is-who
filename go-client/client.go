@@ -28,6 +28,7 @@ type User struct {
 	SlackID   string `json:"slack_id"`         // Slack
 	AWS       string `json:"aws"`              // first initial + last name
 	Github    string `json:"github,omitempty"` // Github
+	Active    bool   `json:"active"`           // Is user currently at Clever
 }
 
 // GetUserList makes a call to /list and returns all users.
