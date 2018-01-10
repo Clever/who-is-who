@@ -1,15 +1,15 @@
-.PHONY: all test lint format run go-client
+.PHONY: all test lint format run build-client
 SHELL := /bin/bash
 JS_FILES := $(shell find . -name "*.js" -not -path "./node_modules/*")
 
 all: test lint
 
-go-client:
+build-client:
 	go get -d -t github.com/Clever/who-is-who/go-client # fetch deps
 	go build go-client/client.go # ensures go client compiles
 	go test github.com/Clever/who-is-who/go-client # run tests
 
-test: go-client lint
+test: build-client lint
 	@./tests/run_integration_tests.sh
 
 lint:
