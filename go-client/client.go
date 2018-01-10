@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	retryablehttp "github.com/hashicorp/go-retryablehttp"
 )
 
 // Client represents the API client. It holds the endpoint the server is expected to be
@@ -33,7 +35,7 @@ type User struct {
 
 // GetUserList makes a call to /list and returns all users.
 func (c Client) GetUserList() ([]User, error) {
-	resp, err := http.Get(c.endpoint + "/list")
+	resp, err := retryablehttp.Get(c.endpoint + "/list")
 	if err != nil {
 		return []User{}, fmt.Errorf("list users call failed => {%s}", err)
 	}
@@ -55,10 +57,10 @@ func (c Client) UpsertUser(author string, userInfo User) (User, error) {
 	if err != nil {
 		return User{}, fmt.Errorf("json marshaling failed => {%s}", err)
 	}
-	userInfoBuffer := bytes.NewBuffer(userInfoJson)
+	userInfoReader := bytes.NewReader(userInfoJson)
 
-	httpClient := &http.Client{}
-	req, err := http.NewRequest("PUT", c.endpoint+fmt.Sprintf("/alias/email/%s", email), userInfoBuffer)
+	httpClient := retryablehttp.NewClient()
+	req, err := retryablehttp.NewRequest("PUT", c.endpoint+fmt.Sprintf("/alias/email/%s", email), userInfoReader)
 	req.Header.Add("X-WIW-Author", author)
 	req.Header.Add("Content-Type", "application/json")
 
@@ -73,7 +75,7 @@ func (c Client) UpsertUser(author string, userInfo User) (User, error) {
 
 // UserByAWS finds a user based on their AWS username.
 func (c Client) UserByAWS(username string) (User, error) {
-	resp, err := http.Get(c.endpoint + fmt.Sprintf("/alias/aws/%s", username))
+	resp, err := retryablehttp.Get(c.endpoint + fmt.Sprintf("/alias/aws/%s", username))
 	if err != nil {
 		return User{}, fmt.Errorf("aws alias match call failed => {%s}", err)
 	}
@@ -83,7 +85,7 @@ func (c Client) UserByAWS(username string) (User, error) {
 
 // UserByGithub finds a user based on their Github username.
 func (c Client) UserByGithub(username string) (User, error) {
-	resp, err := http.Get(c.endpoint + fmt.Sprintf("/alias/github/%s", username))
+	resp, err := retryablehttp.Get(c.endpoint + fmt.Sprintf("/alias/github/%s", username))
 	if err != nil {
 		return User{}, fmt.Errorf("aws alias match call failed => {%s}", err)
 	}
@@ -93,7 +95,7 @@ func (c Client) UserByGithub(username string) (User, error) {
 
 // UserBySlack finds a user based on their Slack username.
 func (c Client) UserBySlack(username string) (User, error) {
-	resp, err := http.Get(c.endpoint + fmt.Sprintf("/alias/slack/%s", username))
+	resp, err := retryablehttp.Get(c.endpoint + fmt.Sprintf("/alias/slack/%s", username))
 	if err != nil {
 		return User{}, fmt.Errorf("slack alias match call failed => {%s}", err)
 	}
@@ -102,7 +104,7 @@ func (c Client) UserBySlack(username string) (User, error) {
 
 // UserByEmail finds a user based on their email.
 func (c Client) UserByEmail(email string) (User, error) {
-	resp, err := http.Get(c.endpoint + fmt.Sprintf("/alias/email/%s", email))
+	resp, err := retryablehttp.Get(c.endpoint + fmt.Sprintf("/alias/email/%s", email))
 	if err != nil {
 		return User{}, fmt.Errorf("email match call failed => {%s}", err)
 	}
