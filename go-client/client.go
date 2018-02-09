@@ -34,9 +34,9 @@ type User struct {
 	Team      string   `json:"team,omitempty"`   // What team is the user on
 	Pickabot  struct { // Pickabot related config
 		TeamOverrides []struct {
-			Team        string `json:"team"`
-			AddOrRemove string `json:"add-or-remove"`
-			Until       int64  `json:"until"`
+			Team    string `json:"team"`
+			Include bool   `json:"include"`
+			Until   int64  `json:"until"`
 		} `json:"team_overrides"`
 		Flair string `json:"flair"`
 	} `json:"pickabot,omitempty"`
