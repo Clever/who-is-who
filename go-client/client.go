@@ -37,7 +37,7 @@ type User struct {
 			Team    string `json:"team"`
 			Include bool   `json:"include"`
 			Until   int64  `json:"until"`
-		} `json:"team_overrides"`
+		} `json:"team_overrides,omitempty"`
 		Flair string `json:"flair"`
 	} `json:"pickabot,omitempty"`
 }
@@ -118,6 +118,15 @@ func (c Client) UserByEmail(email string) (User, error) {
 		return User{}, fmt.Errorf("email match call failed => {%s}", err)
 	}
 
+	return returnUser(resp)
+}
+
+// UserBySlackID finds a user by SlackID
+func (c Client) UserBySlackID(slackID string) (User, error) {
+	resp, err := retryablehttp.Get(c.endpoint + fmt.Sprintf("/alias/slack_id/%s", slackID))
+	if err != nil {
+		return User{}, fmt.Errorf("slack ID match call failed => {%s}", err)
+	}
 	return returnUser(resp)
 }
 
