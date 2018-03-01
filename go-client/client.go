@@ -22,24 +22,30 @@ func NewClient(endpoint string) Client {
 
 // User represents the data collected and served by who's who
 type User struct {
-	FirstName string   `json:"first_name"`       // FirstName
-	LastName  string   `json:"last_name"`        // LastName
-	Email     string   `json:"email"`            // Email
-	Slack     string   `json:"slack"`            // Slack
-	Phone     string   `json:"phone"`            // Phone
-	SlackID   string   `json:"slack_id"`         // Slack ID (not Slack alias)
-	AWS       string   `json:"aws,omitempty"`    // first initial + last name
-	Github    string   `json:"github,omitempty"` // Github username
-	Active    bool     `json:"active"`           // Is user currently at Clever
-	Team      string   `json:"team,omitempty"`   // What team is the user on
-	Pickabot  struct { // Pickabot related config
-		TeamOverrides []struct {
-			Team    string `json:"team"`
-			Include bool   `json:"include"`
-			Until   int64  `json:"until"`
-		} `json:"team_overrides,omitempty"`
-		Flair string `json:"flair"`
-	} `json:"pickabot,omitempty"`
+	FirstName string `json:"first_name"`       // FirstName
+	LastName  string `json:"last_name"`        // LastName
+	Email     string `json:"email"`            // Email
+	Slack     string `json:"slack"`            // Slack
+	Phone     string `json:"phone"`            // Phone
+	SlackID   string `json:"slack_id"`         // Slack ID (not Slack alias)
+	AWS       string `json:"aws,omitempty"`    // first initial + last name
+	Github    string `json:"github,omitempty"` // Github username
+	Active    bool   `json:"active"`           // Is user currently at Clever
+	Team      string `json:"team,omitempty"`   // What team is the user on
+	Pickabot  `json:"pickabot,omitempty"`
+}
+
+// Pickabot is config specific to https://github.com/clever/pickabot
+type Pickabot struct {
+	TeamOverrides []PickabotTeamOverride `json:"team_overrides,omitempty"`
+	Flair         string                 `json:"flair"`
+}
+
+// PickabotTeamOverride describes a temporary override when picking a team member
+type PickabotTeamOverride struct {
+	Team    string `json:"team"`
+	Include bool   `json:"include"`
+	Until   int64  `json:"until"` // unix timestamp in seconds
 }
 
 // GetUserList makes a call to /list and returns all users.
