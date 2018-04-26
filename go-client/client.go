@@ -24,7 +24,7 @@ func NewClient(endpoint string) Client {
 type User struct {
 	FirstName string `json:"first_name,omitempty"` // FirstName
 	LastName  string `json:"last_name,omitempty"`  // LastName
-	Email     string `json:"email,omitempty"`      // Email
+	Email     string `json:"email"`                // Email
 	Slack     string `json:"slack,omitempty"`      // Slack
 	Phone     string `json:"phone,omitempty"`      // Phone
 	SlackID   string `json:"slack_id,omitempty"`   // Slack ID (not Slack alias)
