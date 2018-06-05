@@ -158,6 +158,11 @@ module.exports = function(storage) {
     put(author, key, val, body, cb) {
       val = parseIntIfNeeded(val);
 
+      // Validate field types
+      if (body && body.active && typeof body.active != "boolean") {
+        return cb(UserError("'active' field must be a boolean"));
+      }
+
       this.one(key, val, (err, obj) => {
         if (err) {
           return cb(err);
@@ -165,7 +170,7 @@ module.exports = function(storage) {
 
         // Before creating a new object, try to find pre-existing object using email prop.
         // Should be effective since all new objects must have an email prop.
-        if(obj == null && key !== "email") {
+        if (obj == null && key !== "email") {
           body = _.set(body, key, val); // Here so key/val pair isn't lost
 
           return this.put(author, "email", body["email"], body, cb);
@@ -175,7 +180,9 @@ module.exports = function(storage) {
         let cur = _.defaultsDeep({}, body, prev);
         cur = removeEmptyValues(cur); // Don't save empty values
 
-        if(key === "email") { cur.email = val; }
+        if (key === "email") {
+          cur.email = val;
+        }
 
         if (!cur.email) {
           return cb(UserError("Can't save.  No email address found."));
