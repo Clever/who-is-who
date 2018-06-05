@@ -92,60 +92,83 @@ function storeToken(token) {
 
 function listUsers(auth) {
   const service = google.admin("directory_v1");
-  service.users.list({
-    auth: auth,
-    customer: "my_customer",
-    maxResults: 200,
-    orderBy: "email"
-  }, (err, response) => {
-    if (err) {
-      console.log("The API returned an error: " + err);
-      return;
-    }
-    const users = response.users;
-    if (users.length == 0) {
-      console.log("No users in the domain.");
-    } else {
-      db.all((err, data) => {
-        const googleEmails = users.filter(x => x.orgUnitPath == "/FTEs").map(u => u.primaryEmail);
-        let activeWhoIsWho = data.filter(u => u.active);
-        let inSync = true;
-        for (const googleEmail of googleEmails) {
-          const whoIsWho = data.filter(u => u.email == googleEmail);
-          let employee = {};
-          if (whoIsWho.length != 1) {
-            console.log("Missing who is who for: " + googleEmail);
-            employee = { email: googleEmail };
-          } else {
-            employee = whoIsWho[0];
-          }
-          if (employee.active) {
-            activeWhoIsWho = activeWhoIsWho.filter(u => u.email !== googleEmail);
-          } else {
-            inSync = false;
-            console.log("Not marked active, should be: " + googleEmail);
-            employee.active = true;
-            db.put("sync-users-script", "email", employee.email, employee, (err) => {
-              if (err) {
-                console.log("Error updating user (" + employee.email + "): " + err);
-              }
-            });
-          }
-        }
-        for (const employee of activeWhoIsWho) {
-          inSync = false;
-          console.log("Marked active, should not be: " + employee.email);
-          employee.active = false;
-          db.put("sync-users-script", "email", employee.email, employee, (err) => {
-            if (err) {
-              console.log("Error updating user (" + employee.email + "): " + err);
+  service.users.list(
+    {
+      auth: auth,
+      customer: "my_customer",
+      maxResults: 200,
+      orderBy: "email"
+    },
+    (err, response) => {
+      if (err) {
+        console.log("The API returned an error: " + err);
+        return;
+      }
+      const users = response.users;
+      if (users.length == 0) {
+        console.log("No users in the domain.");
+      } else {
+        db.all((err, data) => {
+          const googleEmails = users
+            .filter(x => x.orgUnitPath == "/FTEs")
+            .map(u => u.primaryEmail);
+          let activeWhoIsWho = data.filter(u => u.active);
+          let inSync = true;
+          for (const googleEmail of googleEmails) {
+            const whoIsWho = data.filter(u => u.email == googleEmail);
+            let employee = {};
+            if (whoIsWho.length != 1) {
+              console.log("Missing who is who for: " + googleEmail);
+              employee = {email: googleEmail};
+            } else {
+              employee = whoIsWho[0];
             }
-          });
-        }
-        if (inSync) {
-          console.log("You're in sync! Bye bye bye.");
-        }
-      });
+            if (employee.active) {
+              activeWhoIsWho = activeWhoIsWho.filter(
+                u => u.email !== googleEmail
+              );
+            } else {
+              inSync = false;
+              console.log("Not marked active, should be: " + googleEmail);
+              employee.active = true;
+              db.put(
+                "sync-users-script",
+                "email",
+                employee.email,
+                employee,
+                err => {
+                  if (err) {
+                    console.log(
+                      "Error updating user (" + employee.email + "): " + err
+                    );
+                  }
+                }
+              );
+            }
+          }
+          for (const employee of activeWhoIsWho) {
+            inSync = false;
+            console.log("Marked active, should not be: " + employee.email);
+            employee.active = false;
+            db.put(
+              "sync-users-script",
+              "email",
+              employee.email,
+              employee,
+              err => {
+                if (err) {
+                  console.log(
+                    "Error updating user (" + employee.email + "): " + err
+                  );
+                }
+              }
+            );
+          }
+          if (inSync) {
+            console.log("You're in sync! Bye bye bye.");
+          }
+        });
+      }
     }
-  });
+  );
 }

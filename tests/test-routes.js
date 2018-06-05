@@ -367,17 +367,25 @@ exports["/alias/`key`/`value`"] = {
       test.equal(res.statusCode, 200);
       test.deepEqual(data, {cheggit: "yo", email: "peep@peep.com"});
 
-
-      mockPOST("/alias/slack/peep", {orto: "next", "email": "peep@peep.com"}, (res, data) => {
+      mockPOST("/alias/slack/peep", {orto: "next", email: "peep@peep.com"}, (
+        res,
+        data
+      ) => {
         test.equal(res.statusCode, 200);
         test.deepEqual(data, {
-          cheggit: "yo", orto: "next", email: "peep@peep.com", slack: "peep"
+          cheggit: "yo",
+          orto: "next",
+          email: "peep@peep.com",
+          slack: "peep"
         });
 
         mockGET("/alias/email/peep@peep.com", (res, data) => {
           test.equal(res.statusCode, 200);
           test.deepEqual(data, {
-            cheggit: "yo", orto: "next", email: "peep@peep.com", slack: "peep"
+            cheggit: "yo",
+            orto: "next",
+            email: "peep@peep.com",
+            slack: "peep"
           });
 
           mockGET("/alias/email/peep@peep.com/history/", (res, data) => {
@@ -407,9 +415,9 @@ exports["/alias/`key`/`value`"] = {
       test.equal(res.statusCode, 200);
       test.deepEqual(data, {slack: "poop", email: "poop@poop.com"});
 
-      mockPOST("/alias/slack/poop", {"email": "poop2@poop.com"}, (res, data) => {
+      mockPOST("/alias/slack/poop", {email: "poop2@poop.com"}, (res, data) => {
         test.equal(res.statusCode, 200);
-        test.deepEqual(data, { email: "poop2@poop.com", slack: "poop" });
+        test.deepEqual(data, {email: "poop2@poop.com", slack: "poop"});
 
         mockGET("/alias/email/poop@poop.com", (res, data) => {
           test.equal(res.statusCode, 404);
@@ -417,7 +425,7 @@ exports["/alias/`key`/`value`"] = {
 
           mockGET("/alias/email/poop2@poop.com", (res, data) => {
             test.equal(res.statusCode, 200);
-            test.deepEqual(data, { email: "poop2@poop.com", slack: "poop" });
+            test.deepEqual(data, {email: "poop2@poop.com", slack: "poop"});
 
             test.done();
           });
