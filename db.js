@@ -158,6 +158,11 @@ module.exports = function(storage) {
     put(author, key, val, body, cb) {
       val = parseIntIfNeeded(val);
 
+      // Validate field types
+      if (body && body.active && typeof body.active != "boolean") {
+        return cb(UserError("'active' field must be a boolean"));
+      }
+
       this.one(key, val, (err, obj) => {
         if (err) {
           return cb(err);
