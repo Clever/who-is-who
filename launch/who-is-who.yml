@@ -20,3 +20,6 @@ expose:
 shepherds:
 - "xavi.ramirez@clever.com"
 team: "eng-infra"
+autoscaling:
+  metric: cpu
+  metric_target: 85
