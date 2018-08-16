@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/Clever/who-is-who
     docker:
-    - image: circleci/build-image:ubuntu-14.04-XXL-upstart-1189-5614f37
+    - image: circleci/node:8.11.3-stretch
     environment:
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
@@ -16,6 +16,11 @@ jobs:
     - run:
         command: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
         name: Set up CircleCI artifacts directories
+    - run:
+        command: |-
+          sed -i.bak s/\${npm_auth_token}/$NPM_TOKEN/ .npmrc_docker
+          mv .npmrc_docker .npmrc
+        name: Set up .npmrc
     - run: npm install
     - run: make test
     - run: npm prune --production
