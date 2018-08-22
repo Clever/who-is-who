@@ -30,7 +30,7 @@ type User struct {
 	SlackID   string `json:"slack_id,omitempty"`   // Slack ID (not Slack alias)
 	AWS       string `json:"aws,omitempty"`        // first initial + last name
 	Github    string `json:"github,omitempty"`     // Github username
-	Active    bool   `json:"active,omitempty"`     // Is user currently at Clever
+	Active    bool   `json:"active"`               // Is user currently at Clever
 	Team      string `json:"team,omitempty"`       // What team is the user on
 	Pickabot  `json:"pickabot,omitempty"`
 }
