@@ -4,8 +4,6 @@ env:
 - PORT
 - AWS_DYNAMO_ENDPOINT
 - AWS_DYNAMO_REGION
-- AWS_ACCESS_KEY_ID
-- AWS_SECRET_ACCESS_KEY
 - TABLE_NAME_SUFFIX
 - DYNAMO_READ_WRITE_CAPACITY
 resources:
@@ -20,3 +18,13 @@ expose:
 shepherds:
 - "xavi.ramirez@clever.com"
 team: "eng-infra"
+aws:
+  dynamodb:
+    read:
+    - whoswho-paths
+    - whoswho-objects
+    - whoswho-history
+    write:
+    - whoswho-paths
+    - whoswho-objects
+    - whoswho-history
