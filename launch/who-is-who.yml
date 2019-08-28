@@ -15,8 +15,6 @@ expose:
   health_check:
     type: http
     path: /health
-shepherds:
-- "xavi.ramirez@clever.com"
 team: "eng-infra"
 aws:
   dynamodb:
