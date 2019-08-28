@@ -10,7 +10,7 @@
   "author": "",
   "dependencies": {
     "async": "^1.5.2",
-    "aws-sdk": "^2.2.41",
+    "aws-sdk": "^2.466.0",
     "beeline": "^0.2.4",
     "body-parser": "^1.15.0",
     "express": "^4.13.4",
