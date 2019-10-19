@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/Clever/who-is-who
     docker:
-    - image: circleci/golang:1.12-stretch-node
+    - image: circleci/golang:1.13-stretch-node
     environment:
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
