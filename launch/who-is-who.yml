@@ -15,7 +15,7 @@ expose:
   health_check:
     type: http
     path: /health
-team: "eng-infra"
+team: eng-infra
 aws:
   dynamodb:
     read:
@@ -26,3 +26,23 @@ aws:
     - whoswho-paths
     - whoswho-objects
     - whoswho-history
+alarms:
+- type: InternalErrorAlarm
+  severity: minor
+  # channel: this will go to the channel that this team has configured in catapult for minor alarms
+  parameters:
+    threshold: 0.01
+  extraParameters:
+    source: Target
+- type: InternalErrorAlarm
+  severity: major
+  # channel: this will go to the channel that this team has configured in catapult for major alarms
+  parameters:
+    threshold: 0.05
+  extraParameters:
+    source: Target
+- type: InternalErrorAlarm
+  severity: major
+  # channel: this will go to the channel that this team has configured in catapult for major alarms
+  parameters:
+    threshold: 0.01
