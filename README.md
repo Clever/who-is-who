@@ -26,7 +26,7 @@ The header `X-WIW-AUTHOR` is required for all requests. Please set it to your em
 
 ## Schema
 
-`who-is-who` is backed by three DynamoDB tables in us-west-1. While these can be edited by hand via AWS console or CLI, please be very careful. The full specs can be found [here](./storage/dynamo.js).
+`who-is-who` is backed by three DynamoDB tables in us-west-1. While these can be edited by hand via AWS console or CLI, please be very careful. The full specs can be found [here](./storage/dynamodb.js).
 
 - `whoswho-objects` is a full collection of each user along with arbitrary key-value data about them. It uses a UUID field named `_whoid` as the primary key. Email is required field, although this is not enforced on the database level.
 - `whoswho-paths` serves sort-of like a very general index over `whoswho-objects`. It uses a composite primary key consisting of a partition key `path` for the field and a sort key consisting of the value of that field for a particular user, then the null character `\u0000`, then that user's `_whoid`. Each item also has `_whoid` as a separate field.
@@ -41,6 +41,21 @@ if everything is in sync, there would be the following items in `whoswho-paths`
 
 ## Debugging
 
-If there's an issue, it's likely that `whoswho-objects` and `whoswho-paths` are out of sync. This likely needs to be fixed by manually changing the tables. You can use the AWS DynamoDB CLI to put the `\u0000` into `whoswho-paths`.
+If there's an issue, it's likely that `whoswho-objects` and `whoswho-paths` are out of sync. This likely needs to be fixed by manually changing the tables. You can use the AWS DynamoDB CLI to put the `\u0000` into `whoswho-paths`. For example:
+`aws dynamodb put-item --table whoswho-paths --item file://item.json`
+and
+```json
+{
+    "path": {
+        "S": "email"
+    },
+    "_whoid": {
+        "S": "id"
+    },
+    "val_whoid": {
+        "S": "user.name@example.com\u0000id"
+    }
+}
+```
 
 There are no API endpoints at the moment for deleting keys, but if you set the value of a key to the empty string (e.g. using `POST /alias/:key/:value`, it will be deleted. The preferred way to delete a user is to set their `active` to `false`.
