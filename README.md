@@ -14,8 +14,9 @@ The header `X-WIW-AUTHOR` is required for all requests. Please set it to your em
 - `/alias/:key` **(GET)** -- lists all users who have any value set for `key` (same as `/list/:key`)
 - `/alias/:key/:value` **(GET)** -- If there is exactly one user matching `{key:value}`, return that user. Otherwise, error. (For 0 or more than 1 user, use `/list/:key/:value`).
 - `/alias/:key/:value` **(POST)** -- Requires a JSON object in the body and exactly one user matching `{key:value}`. Sets each key present in body to the value provided in body, leaving any other keys alone.
-- `/alias/:key/:value/data/:path...` **(GET)** -- Gets the value of a single key for the single matching user. For example, `/alias/key/value/data/key2/innerkey` returns the value of `user.key2.innerykey`.
-- `/alias/:key/:value/data/:path...` **(POST)** -- Requires a body. Sets the value of matching user's path to an object in body. This one is somewhat weird, you're probably better off using `POST /alias/:key/:value`.
+- `/alias/:key/:value/data/:path...` **(GET)** -- Gets the value of a single key for the single matching user. For example, `/alias/key/value/data/key2/innerkey` returns the value of `user.key2.innerkey`.
+- `/alias/:key/:value/data/:path...` **(POST)** -- Requires a body. Sets the value of matching user's path to an object in body. Good for setting the value of a nested key without touching  Body must be a JSON object (not a scalar), so it isn't fully featured. It is often simpler to use `POST /alias/:key/:value`, where if you are setting a nested key, copying the parts of the current value that you aren't changing.
+Example: given that `GET /alias/key/value/` returns `{"key": "value", "key2": {"innerkey": "value2"}`, then `POST /alias/key/value/data/path/key2/newinnerkey` with body `{"key": "value"}` will return `{"key": "value", "key2": {"innerkey": "value3", "newinnerkey":{"key":"value"}}}` and make the appropriate updates.
 
 - `/alias/:key/:value/history/:path...`  **(GET)** -- Gets the full history of the given path for the single matching user.
 
@@ -26,7 +27,7 @@ The header `X-WIW-AUTHOR` is required for all requests. Please set it to your em
 
 ## Schema
 
-`who-is-who` is backed by three DynamoDB tables in us-west-1. While these can be edited by hand via AWS console or CLI, please be very careful. The full specs can be found [here](./storage/dynamodb.js).
+`who-is-who` is backed by three DynamoDB tables. While these can be edited by hand via AWS console or CLI, please be very careful. The full specs can be found [here](./storage/dynamodb.js).
 
 - `whoswho-objects` is a full collection of each user along with arbitrary key-value data about them. It uses a UUID field named `_whoid` as the primary key. Email is required field, although this is not enforced on the database level.
 - `whoswho-paths` serves sort-of like a very general index over `whoswho-objects`. It uses a composite primary key consisting of a partition key `path` for the field and a sort key consisting of the value of that field for a particular user, then the null character `\u0000`, then that user's `_whoid`. Each item also has `_whoid` as a separate field.
