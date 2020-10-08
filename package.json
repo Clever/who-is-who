@@ -19,10 +19,11 @@
     "uuid": "^2.0.1"
   },
   "devDependencies": {
+    "@clever/prettier-config": "1.0.0",
     "eslint": "^3.10.2",
     "googleapis": "^19.0.0",
     "node-mocks-http": "^1.5.4",
     "nodeunit": "^0.11.0",
-    "prettier": "^0.18.0"
+    "prettier": "2.1.2"
   }
 }
