@@ -21,13 +21,13 @@ const storage = require("./../storage/dynamodb")(
   accessKeyId,
   secretAccessKey,
   "",
-  5
+  5,
 );
 const db = require("./../db")(storage);
 
 const cmd = "ark secrets read production.who-is-who google-client-key --no-upgrade";
 
-exec(cmd, function(err, content) {
+exec(cmd, function (err, content) {
   if (err) {
     console.log("Error reading secret: " + err);
     return;
@@ -43,7 +43,7 @@ function authorize(credentials, callback) {
   const oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
 
   // Check if we have previously stored a token.
-  fs.readFile(TOKEN_PATH, function(err, token) {
+  fs.readFile(TOKEN_PATH, function (err, token) {
     if (err) {
       console.log("Getting new token");
       getNewToken(oauth2Client, callback);
@@ -57,16 +57,16 @@ function authorize(credentials, callback) {
 function getNewToken(oauth2Client, callback) {
   const authUrl = oauth2Client.generateAuthUrl({
     access_type: "offline",
-    scope: SCOPES
+    scope: SCOPES,
   });
   console.log("Authorize this app by visiting this url: ", authUrl);
   const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
   });
-  rl.question("Enter the code from that page here: ", function(code) {
+  rl.question("Enter the code from that page here: ", function (code) {
     rl.close();
-    oauth2Client.getToken(code, function(err, token) {
+    oauth2Client.getToken(code, function (err, token) {
       if (err) {
         console.log("Error while trying to retrieve access token", err);
         return;
@@ -92,60 +92,65 @@ function storeToken(token) {
 
 function listUsers(auth) {
   const service = google.admin("directory_v1");
-  service.users.list({
-    auth: auth,
-    customer: "my_customer",
-    maxResults: 200,
-    orderBy: "email"
-  }, (err, response) => {
-    if (err) {
-      console.log("The API returned an error: " + err);
-      return;
-    }
-    const users = response.users;
-    if (users.length == 0) {
-      console.log("No users in the domain.");
-    } else {
-      db.all((err, data) => {
-        const googleEmails = users.filter(x => x.orgUnitPath == "/FTEs").map(u => u.primaryEmail);
-        let activeWhoIsWho = data.filter(u => u.active);
-        let inSync = true;
-        for (const googleEmail of googleEmails) {
-          const whoIsWho = data.filter(u => u.email == googleEmail);
-          let employee = {};
-          if (whoIsWho.length != 1) {
-            console.log("Missing who is who for: " + googleEmail);
-            employee = { email: googleEmail };
-          } else {
-            employee = whoIsWho[0];
+  service.users.list(
+    {
+      auth: auth,
+      customer: "my_customer",
+      maxResults: 200,
+      orderBy: "email",
+    },
+    (err, response) => {
+      if (err) {
+        console.log("The API returned an error: " + err);
+        return;
+      }
+      const users = response.users;
+      if (users.length == 0) {
+        console.log("No users in the domain.");
+      } else {
+        db.all((err, data) => {
+          const googleEmails = users
+            .filter((x) => x.orgUnitPath == "/FTEs")
+            .map((u) => u.primaryEmail);
+          let activeWhoIsWho = data.filter((u) => u.active);
+          let inSync = true;
+          for (const googleEmail of googleEmails) {
+            const whoIsWho = data.filter((u) => u.email == googleEmail);
+            let employee = {};
+            if (whoIsWho.length != 1) {
+              console.log("Missing who is who for: " + googleEmail);
+              employee = { email: googleEmail };
+            } else {
+              employee = whoIsWho[0];
+            }
+            if (employee.active) {
+              activeWhoIsWho = activeWhoIsWho.filter((u) => u.email !== googleEmail);
+            } else {
+              inSync = false;
+              console.log("Not marked active, should be: " + googleEmail);
+              employee.active = true;
+              db.put("sync-users-script", "email", employee.email, employee, (err) => {
+                if (err) {
+                  console.log("Error updating user (" + employee.email + "): " + err);
+                }
+              });
+            }
           }
-          if (employee.active) {
-            activeWhoIsWho = activeWhoIsWho.filter(u => u.email !== googleEmail);
-          } else {
+          for (const employee of activeWhoIsWho) {
             inSync = false;
-            console.log("Not marked active, should be: " + googleEmail);
-            employee.active = true;
+            console.log("Marked active, should not be: " + employee.email);
+            employee.active = false;
             db.put("sync-users-script", "email", employee.email, employee, (err) => {
               if (err) {
                 console.log("Error updating user (" + employee.email + "): " + err);
               }
             });
           }
-        }
-        for (const employee of activeWhoIsWho) {
-          inSync = false;
-          console.log("Marked active, should not be: " + employee.email);
-          employee.active = false;
-          db.put("sync-users-script", "email", employee.email, employee, (err) => {
-            if (err) {
-              console.log("Error updating user (" + employee.email + "): " + err);
-            }
-          });
-        }
-        if (inSync) {
-          console.log("You're in sync! Bye bye bye.");
-        }
-      });
-    }
-  });
+          if (inSync) {
+            console.log("You're in sync! Bye bye bye.");
+          }
+        });
+      }
+    },
+  );
 }

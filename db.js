@@ -18,10 +18,12 @@ function parseIntIfNeeded(n) {
 
 function toPaths(obj) {
   let paths = {};
-  let node, nodes = [{path: "", obj: obj}];
+  let node,
+    nodes = [{ path: "", obj: obj }];
 
   while ((node = nodes.pop()) != undefined) {
-    let obj = node.obj, path = node.path;
+    let obj = node.obj,
+      path = node.path;
 
     if (!_.isPlainObject(obj)) {
       paths[path] = obj;
@@ -30,10 +32,10 @@ function toPaths(obj) {
       paths[path] = {};
     } // Empty object means path contains a sub object
 
-    Object.keys(obj).forEach(key => {
+    Object.keys(obj).forEach((key) => {
       let next = {
         path: !path ? key : path + "." + key,
-        obj: obj[key]
+        obj: obj[key],
       };
       nodes.push(next);
     });
@@ -49,16 +51,16 @@ function generateDiffs(author, prev, cur) {
   let curPaths = toPaths(cur);
 
   // Find deleted paths
-  Object.keys(prevPaths).forEach(path => {
+  Object.keys(prevPaths).forEach((path) => {
     if (path in curPaths) {
       return;
     }
 
-    diffs[path] = {deleted: true, prev: prevPaths[path], author: author};
+    diffs[path] = { deleted: true, prev: prevPaths[path], author: author };
   });
 
   // Find changed and created paths
-  Object.keys(curPaths).forEach(path => {
+  Object.keys(curPaths).forEach((path) => {
     let prev = prevPaths[path];
     let cur = curPaths[path];
 
@@ -67,9 +69,9 @@ function generateDiffs(author, prev, cur) {
     }
 
     if (path in prevPaths) {
-      diffs[path] = {prev: prev, cur: cur};
+      diffs[path] = { prev: prev, cur: cur };
     } else {
-      diffs[path] = {created: true, cur: cur};
+      diffs[path] = { created: true, cur: cur };
     }
     diffs[path].author = author;
   });
@@ -80,9 +82,10 @@ function generateDiffs(author, prev, cur) {
 function removeEmptyValues(obj) {
   obj = _.cloneDeep(obj);
 
-  let node, nodes = [obj];
+  let node,
+    nodes = [obj];
   while ((node = nodes.pop()) != undefined) {
-    Object.keys(node).forEach(key => {
+    Object.keys(node).forEach((key) => {
       if (node[key] === "" || _.isNil(node[key])) {
         delete node[key];
       }
@@ -94,7 +97,7 @@ function removeEmptyValues(obj) {
   return obj;
 }
 
-module.exports = function(storage) {
+module.exports = function (storage) {
   return {
     all(cb) {
       storage.all(cb);
@@ -139,7 +142,7 @@ module.exports = function(storage) {
           }
 
           let hist = {};
-          diffs.forEach(diff => {
+          diffs.forEach((diff) => {
             let d = _.omit(diff, "path");
 
             hist[diff.path] = hist[diff.path] || [];
@@ -147,7 +150,7 @@ module.exports = function(storage) {
             hist[diff.path].push(d);
           });
 
-          Object.keys(hist).forEach(key => {
+          Object.keys(hist).forEach((key) => {
             hist[key].sort((a, b) => b.date - a.date);
           });
 
@@ -165,28 +168,30 @@ module.exports = function(storage) {
 
         // Before creating a new object, try to find pre-existing object using email prop.
         // Should be effective since all new objects must have an email prop.
-        if(obj == null && key !== "email") {
+        if (obj == null && key !== "email") {
           body = _.set(body, key, val); // Here so key/val pair isn't lost
 
           return this.put(author, "email", body["email"], body, cb);
         }
 
-        let prev = obj || {_whoid: uuid()};
+        let prev = obj || { _whoid: uuid() };
         let cur = _.defaultsDeep({}, body, prev);
         cur = removeEmptyValues(cur); // Don't save empty values
 
-        if(key === "email") { cur.email = val; }
+        if (key === "email") {
+          cur.email = val;
+        }
 
         if (!cur.email) {
           return cb(UserError("Can't save.  No email address found."));
         }
-        if (Object.keys(cur).some(k => k.indexOf(".") !== -1)) {
+        if (Object.keys(cur).some((k) => k.indexOf(".") !== -1)) {
           return cb(UserError("Key with dots ('.') aren't supported"));
         }
 
         let diffs = generateDiffs(author, prev, cur);
         storage.put(cur, diffs, cb);
       });
-    }
+    },
   };
 };
