@@ -1,3 +1,8 @@
+include node.mk
+.DEFAULT_GOAL := test
+NODE_VERSION := "v12"
+$(eval $(call node-version-check,$(NODE_VERSION)))
+
 .PHONY: all test lint lint-fix format format-all format-check run build-client
 SHELL := /bin/bash
 JS_FILES := $(shell find . -name "*.js" -not -path "./node_modules/*")
