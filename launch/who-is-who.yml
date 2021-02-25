@@ -49,7 +49,3 @@ alarms:
     source: ELB
 pod_config:
   group: us-west-1 # same region as its DynamoDBs
-  dev:
-    migrationState: podOnly
-  prod:
-    migrationState: podOnly
