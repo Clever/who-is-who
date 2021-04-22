@@ -9,6 +9,12 @@
   },
   "author": "",
   "dependencies": {
+    "@opentelemetry/exporter-collector-grpc": "^0.19.0",
+    "@opentelemetry/instrumentation": "^0.19.0",
+    "@opentelemetry/instrumentation-express": "^0.15.0",
+    "@opentelemetry/instrumentation-http": "^0.19.0",
+    "@opentelemetry/node": "^0.19.0",
+    "@opentelemetry/tracing": "^0.19.0",
     "async": "^1.5.2",
     "aws-sdk": "^2.466.0",
     "beeline": "^0.2.4",
