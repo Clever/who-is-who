@@ -22,6 +22,8 @@
     "express": "^4.13.4",
     "kayvee": "^3.14.0",
     "lodash": "^4.17.19",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.4",
     "uuid": "^2.0.1"
   },
   "devDependencies": {
@@ -30,8 +32,6 @@
     "googleapis": "^19.0.0",
     "node-mocks-http": "^1.5.4",
     "nodeunit": "^0.11.0",
-    "prettier": "2.1.2",
-    "ts-node": "^9.1.1",
-    "typescript": "^4.2.4"
+    "prettier": "2.1.2"
   }
 }
