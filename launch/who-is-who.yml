@@ -15,7 +15,7 @@ expose:
   health_check:
     type: http
     path: /health
-team: eng-infra
+team: eng-security
 aws:
   dynamodb:
     read:
