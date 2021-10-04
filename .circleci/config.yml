@@ -3,7 +3,10 @@ jobs:
   build:
     working_directory: ~/Clever/who-is-who
     docker:
-    - image: circleci/golang:1.13.6-stretch-node
+    # It's awkward to find a way to simultaneously have the correct version of node and of Go
+    # Since this repo is primarly a node repo, we'll use our standard node image and install a version of go
+    # as a pre-built binary
+    - image: circleci/node:12-stretch
     environment:
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
@@ -17,12 +20,21 @@ jobs:
         command: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
         name: Set up CircleCI artifacts directories
     - run:
+        name: Install Go 1.16
+        command: |-
+          wget https://golang.org/dl/go1.16.8.linux-amd64.tar.gz
+          sudo tar -C /usr/local -xzf go1.16.8.linux-amd64.tar.gz
+    - run:
         command: |-
           sed -i.bak s/\${npm_auth_token}/$NPM_TOKEN/ .npmrc_docker
           mv .npmrc_docker .npmrc
         name: Set up .npmrc
     - run: npm install
-    - run: make test
+    - run:
+        name: Run tests
+        command: |
+          export PATH=$PATH:/usr/local/go/bin
+          make test
     - run: npm prune --production
     - run: $HOME/ci-scripts/circleci/docker-publish $DOCKER_USER $DOCKER_PASS "$DOCKER_EMAIL" $DOCKER_ORG
     - run: $HOME/ci-scripts/circleci/catapult-publish $CATAPULT_URL $CATAPULT_USER $CATAPULT_PASS $APP_NAME

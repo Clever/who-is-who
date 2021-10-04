@@ -14,9 +14,7 @@ PRETTIER := ./node_modules/.bin/prettier
 all: test lint
 
 build-client:
-	go get -d -t github.com/Clever/who-is-who/go-client # fetch deps
-	go build go-client/client.go # ensures go client compiles
-	go test github.com/Clever/who-is-who/go-client # run tests
+	$(MAKE) -C go-client
 
 test: build-client lint
 	@./tests/run_integration_tests.sh
