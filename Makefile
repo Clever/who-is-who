@@ -1,6 +1,6 @@
 include node.mk
 .DEFAULT_GOAL := test
-NODE_VERSION := "v12"
+NODE_VERSION := "v14"
 $(eval $(call node-version-check,$(NODE_VERSION)))
 
 .PHONY: all test lint lint-fix format format-all format-check run build-client
