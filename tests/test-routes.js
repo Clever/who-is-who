@@ -443,8 +443,10 @@ exports["/alias/`key`/`value`"] = {
       mockGET("/alias/uniq/1/history/hi", (res, data) => {
         test.equal(res.statusCode, 200);
         test.equal(Object.keys(data).length, 1);
+        let dataNoDate = data["hi"].map((o) => _.omit(o, "date"));
+        // sort data to match no matter what the order returned is
         test.deepEqual(
-          data["hi"].map((o) => _.omit(o, "date")),
+          dataNoDate.sort((a, b) => b.cur - a.cur),
           [
             { prev: 1, cur: 2, author: "mock-post" },
             { created: true, cur: 1, author: "init" },
