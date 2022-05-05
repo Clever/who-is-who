@@ -47,3 +47,8 @@ alarms:
     source: ELB
 pod_config:
   group: us-west-1 # same region as its DynamoDBs
+deploy_config:
+  canaryInProd: false
+  autoDeployEnvs:
+  - clever-dev
+  - production
