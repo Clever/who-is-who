@@ -2,7 +2,7 @@
 
 A service that knits together user identities from various sources.
 
-Owned by infra
+Owned by Security
 
 ## API
 
