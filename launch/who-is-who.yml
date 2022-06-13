@@ -28,13 +28,13 @@ aws:
     - whoswho-history
 alarms:
 - type: InternalErrorAlarm
-  severity: critical
+  severity: major
   parameters:
     threshold: 0.5
   extraParameters:
     source: Target
 - type: InternalErrorAlarm
-  severity: critical
+  severity: major
   parameters:
     threshold: 0.5
   extraParameters:
