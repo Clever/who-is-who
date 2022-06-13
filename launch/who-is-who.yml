@@ -28,21 +28,15 @@ aws:
     - whoswho-history
 alarms:
 - type: InternalErrorAlarm
-  severity: minor
+  severity: major
   parameters:
-    threshold: 0.01
+    threshold: 0.5
   extraParameters:
     source: Target
 - type: InternalErrorAlarm
   severity: major
   parameters:
-    threshold: 0.05
-  extraParameters:
-    source: Target
-- type: InternalErrorAlarm
-  severity: major
-  parameters:
-    threshold: 0.01
+    threshold: 0.5
   extraParameters:
     source: ELB
 pod_config:
