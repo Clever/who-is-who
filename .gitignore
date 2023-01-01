@@ -12,3 +12,4 @@ dynamo-local
 
 # Token used for Google user sync
 token.json
+.git/

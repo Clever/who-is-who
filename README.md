@@ -60,3 +60,4 @@ and
 ```
 
 There are no API endpoints at the moment for deleting keys, but if you set the value of a key to the empty string (e.g. using `POST /alias/:key/:value`, it will be deleted. The preferred way to delete a user is to set their `active` to `false`.
+test
