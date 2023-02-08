@@ -48,4 +48,4 @@ deploy_config:
   - production
 mesh_config:
   dev:
-    state: hybrid
+    state: mesh_only
