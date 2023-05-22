@@ -6,7 +6,7 @@ jobs:
     # It's awkward to find a way to simultaneously have the correct version of node and of Go
     # Since this repo is primarly a node repo, we'll use our standard node image and install a version of go
     # as a pre-built binary
-    - image: circleci/node:14-buster
+    - image: circleci/node:18-buster
     environment:
       CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
       CIRCLE_TEST_REPORTS: /tmp/circleci-test-results
