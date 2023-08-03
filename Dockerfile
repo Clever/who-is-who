@@ -2,6 +2,6 @@ FROM node:18-buster
 
 WORKDIR /app
 
-CMD ["npm", "start"]
-
 COPY . /app
+
+CMD ["node", "--require", "./tracing.js", "server.js"]
