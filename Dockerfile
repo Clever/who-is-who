@@ -2,6 +2,8 @@ FROM node:18-buster
 
 WORKDIR /app
 
-CMD ["npm", "start"]
-
 COPY . /app
+
+RUN npm install --userconfig .npmrc_docker
+
+CMD ["node", "--require", "./tracing.js", "server.js"]
