@@ -31,14 +31,6 @@ alarms:
   severity: major
   parameters:
     threshold: 0.5
-  extraParameters:
-    source: Target
-- type: InternalErrorAlarm
-  severity: major
-  parameters:
-    threshold: 0.5
-  extraParameters:
-    source: ELB
 pod_config:
   group: us-west-1 # same region as its DynamoDBs
 deploy_config:
