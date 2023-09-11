@@ -104,7 +104,7 @@ function createWorkingExport(endpoint, region, accessId, secretKey) {
   let toObj = (obj, cb) => {
     var params = { TableName: objTable.TableName, Key: { _whoid: obj._whoid } };
     client.get(params, (err, data) => {
-      cb(err, data.Item);
+      cb(err, data?.Item);
     });
   };
 
@@ -115,7 +115,7 @@ function createWorkingExport(endpoint, region, accessId, secretKey) {
           return cb(err);
         }
 
-        cb(null, scan.Items);
+        cb(null, scan?.Items);
       });
     },
     has(key, cb) {
@@ -131,7 +131,7 @@ function createWorkingExport(endpoint, region, accessId, secretKey) {
           return cb(err);
         }
 
-        async.map(data.Items, toObj, cb);
+        async.map(data?.Items, toObj, cb);
       });
     },
     by(key, val, cb) {
@@ -147,7 +147,7 @@ function createWorkingExport(endpoint, region, accessId, secretKey) {
           return cb(err);
         }
 
-        async.map(data.Items, toObj, cb);
+        async.map(data?.Items, toObj, cb);
       });
     },
     history(whoid, path, cb) {
@@ -168,7 +168,7 @@ function createWorkingExport(endpoint, region, accessId, secretKey) {
           return cb(err);
         }
 
-        let results = data.Items.map((d) => _.omit(d, ["path_time"]));
+        let results = data?.Items.map((d) => _.omit(d, ["path_time"]));
         cb(null, results);
       });
     },
