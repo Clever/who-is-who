@@ -42,5 +42,5 @@ jobs:
 workflows:
   build_test_publish_deploy:
     jobs:
-      build:
-        context: aws-ecr-public
+      - build:
+          context: aws-ecr-public
