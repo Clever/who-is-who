@@ -1,40 +1,40 @@
 run:
   type: docker
 env:
-- PORT
-- AWS_DYNAMO_ENDPOINT
-- AWS_DYNAMO_REGION
-- TABLE_NAME_SUFFIX
-- DYNAMO_READ_WRITE_CAPACITY
+  - PORT
+  - AWS_DYNAMO_ENDPOINT
+  - AWS_DYNAMO_REGION
+  - TABLE_NAME_SUFFIX
+  - DYNAMO_READ_WRITE_CAPACITY
 resources:
   cpu: 0.5
   max_mem: 1.0
 expose:
-- name: default
-  port: 80
-  health_check:
-    type: http
-    path: /health
+  - name: default
+    port: 80
+    health_check:
+      type: http
+      path: /health
 team: eng-security
 aws:
   dynamodb:
     read:
-    - whoswho-paths
-    - whoswho-objects
-    - whoswho-history
+      - whoswho-paths
+      - whoswho-objects
+      - whoswho-history
     write:
-    - whoswho-paths
-    - whoswho-objects
-    - whoswho-history
+      - whoswho-paths
+      - whoswho-objects
+      - whoswho-history
 alarms:
-- type: InternalErrorAlarm
-  severity: major
-  parameters:
-    threshold: 0.5
+  - type: InternalErrorAlarm
+    severity: major
+    parameters:
+      threshold: 0.5
 pod_config:
-  group: us-west-1 # same region as its DynamoDBs
+  group: us-west-2 # same region as its DynamoDBs
 deploy_config:
   canaryInProd: false
   autoDeployEnvs:
-  - clever-dev
-  - production
+    - clever-dev
+    - production
