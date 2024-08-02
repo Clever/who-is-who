@@ -1,5 +1,5 @@
 module github.com/Clever/who-is-who/go-client
 
-go 1.16
+go 1.21
 
 require github.com/hashicorp/go-retryablehttp v0.7.7

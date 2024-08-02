@@ -20,10 +20,10 @@ jobs:
         command: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
         name: Set up CircleCI artifacts directories
     - run:
-        name: Install Go 1.16
+        name: Install Go 1.21
         command: |-
-          wget https://golang.org/dl/go1.16.8.linux-amd64.tar.gz
-          sudo tar -C /usr/local -xzf go1.16.8.linux-amd64.tar.gz
+          wget https://go.dev/dl/go1.21.12.linux-amd64.tar.gz
+          sudo tar -C /usr/local -xzf go1.21.12.linux-amd64.tar.gz
     - run:
         command: |-
           sed -i.bak s/\${npm_auth_token}/$NPM_TOKEN/ .npmrc_docker
