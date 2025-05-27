@@ -3,7 +3,8 @@ const _ = require("lodash");
 
 function omitId(objs) {
   if (Array.isArray(objs)) {
-    return objs.map(omitId);
+    // Filter out null or undefined items
+    return objs.filter(Boolean).map(omitId);
   } else if (_.isPlainObject(objs)) {
     return _.mapValues(_.omit(objs, "_whoid"), omitId);
   } else {
