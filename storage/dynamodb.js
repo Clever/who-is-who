@@ -1,4 +1,5 @@
-const aws = require("aws-sdk");
+const { DynamoDBClient, DescribeTableCommand, CreateTableCommand } = require("@aws-sdk/client-dynamodb");
+const { DynamoDBDocumentClient, GetCommand, ScanCommand, QueryCommand, PutCommand, DeleteCommand } = require("@aws-sdk/lib-dynamodb");
 const async = require("async");
 
 const _ = require("lodash");
@@ -65,93 +66,83 @@ function checkSchema(expected, actual) {
 }
 
 function createTableIfNeeded(dynamodb, table, cb) {
-  dynamodb.describeTable({ TableName: table.TableName }, (err, data) => {
-    if (!err) {
-      return cb(checkSchema(table, data.Table));
-    }
-
-    log.warn("creating table " + table.TableName);
-    dynamodb.createTable(table, cb);
-  });
+  dynamodb.send(new DescribeTableCommand({ TableName: table.TableName }))
+    .then(data => cb(checkSchema(table, data.Table)))
+    .catch(err => {
+      if (err.name === "ResourceNotFoundException") {
+        log.warn("creating table " + table.TableName);
+        dynamodb.send(new CreateTableCommand(table))
+          .then(() => cb(null))
+          .catch(cb);
+      } else {
+        cb(err);
+      }
+    });
 }
 
 function createTablesIfNeeded(endpoint, region, accessId, secretKey, cb) {
-  let dynamodb = new aws.DynamoDB({
+  const dynamodb = new DynamoDBClient({
     endpoint: endpoint,
     region: region,
-    accessKeyId: accessId,
-    secretAccessKey: secretKey,
+    credentials: { accessKeyId: accessId, secretAccessKey: secretKey },
   });
 
   async.parallel(
     [
-      (cb) => createTableIfNeeded(dynamodb, objTable, cb),
-      (cb) => createTableIfNeeded(dynamodb, pathTable, cb),
-      (cb) => createTableIfNeeded(dynamodb, histTable, cb),
+      cb => createTableIfNeeded(dynamodb, objTable, cb),
+      cb => createTableIfNeeded(dynamodb, pathTable, cb),
+      cb => createTableIfNeeded(dynamodb, histTable, cb),
     ],
-    cb,
+    cb
   );
 }
 
 function createWorkingExport(endpoint, region, accessId, secretKey) {
-  let client = new aws.DynamoDB.DocumentClient({
+  const rawClient = new DynamoDBClient({
     endpoint: endpoint,
     region: region,
-    accessKeyId: accessId,
-    secretAccessKey: secretKey,
+    credentials: { accessKeyId: accessId, secretAccessKey: secretKey },
   });
+  const client = DynamoDBDocumentClient.from(rawClient);
 
-  let toObj = (obj, cb) => {
-    var params = { TableName: objTable.TableName, Key: { _whoid: obj._whoid } };
-    client.get(params, (err, data) => {
-      cb(err, data?.Item);
-    });
+  const toObj = (obj, cb) => {
+    client.send(new GetCommand({ TableName: objTable.TableName, Key: { _whoid: obj._whoid } }))
+      .then(data => cb(null, data.Item))
+      .catch(err => cb(err));
   };
 
   return {
     all(cb) {
-      client.scan({ TableName: objTable.TableName }, (err, scan) => {
-        if (err) {
-          return cb(err);
-        }
-
-        cb(null, scan?.Items);
-      });
+      client.send(new ScanCommand({ TableName: objTable.TableName }))
+        .then(data => cb(null, data.Items))
+        .catch(err => cb(err));
     },
     has(key, cb) {
-      var params = {
+      const params = {
         TableName: pathTable.TableName,
         KeyConditionExpression: "#path = :key",
         ExpressionAttributeNames: { "#path": "path" },
         ExpressionAttributeValues: { ":key": key },
       };
 
-      client.query(params, function (err, data) {
-        if (err) {
-          return cb(err);
-        }
-
-        async.map(data?.Items, toObj, cb);
-      });
+      client.send(new QueryCommand(params))
+        .then(data => async.map(data.Items, toObj, cb))
+        .catch(err => cb(err));
     },
     by(key, val, cb) {
-      var params = {
+      const params = {
         TableName: pathTable.TableName,
         KeyConditionExpression: "#path = :key and begins_with(val_whoid, :val)",
         ExpressionAttributeNames: { "#path": "path" },
         ExpressionAttributeValues: { ":key": key, ":val": val + "\u0000" },
       };
 
-      client.query(params, function (err, data) {
-        if (err) {
-          return cb(err);
-        }
-
-        async.map(data?.Items, toObj, cb);
-      });
+      client.send(new QueryCommand(params))
+        .then(data => async.map(data.Items, toObj, cb))
+        .catch(err => cb(err));
     },
     history(whoid, path, cb) {
-      var params = {
+      const params = {
         TableName: histTable.TableName,
         KeyConditionExpression: "#whoid = :whoid",
         ExpressionAttributeNames: { "#whoid": "_whoid" },
@@ -163,68 +154,61 @@ function createWorkingExport(endpoint, region, accessId, secretKey) {
         params.ExpressionAttributeValues[":path"] = path + ".";
       }
 
-      client.query(params, function (err, data) {
-        if (err) {
-          return cb(err);
-        }
-
-        let results = data?.Items.map((d) => _.omit(d, ["path_time"]));
-        cb(null, results);
-      });
+      client.send(new QueryCommand(params))
+        .then(data => {
+          const results = data.Items.map(d => _.omit(d, ["path_time"]));
+          cb(null, results);
+        })
+        .catch(err => cb(err));
     },
     put(cur, diffs, cb) {
-      let callbacks = [];
+      const callbacks = [];
+      const whoid = cur._whoid;
+      const now = new Date();
 
-      let whoid = cur._whoid;
-      let now = new Date();
-
-      callbacks.push((cb) => {
-        client.put({ TableName: objTable.TableName, Item: cur }, cb);
-      });
-      Object.keys(diffs).forEach((path) => {
-        let diff = diffs[path];
-
-        callbacks.push(
-          (cb) => {
-            if (diff.created) {
-              return cb();
-            }
-
-            // value of {} means path has sub object
-            let prefix = _.isEqual(diff.prev, {}) ? "" : diff.prev + "\u0000";
-            let key = { path: path, val_whoid: prefix + whoid };
-            client.delete({ TableName: pathTable.TableName, Key: key }, cb);
-          },
-          (cb) => {
-            if (diff.deleted) {
-              return cb();
-            }
-
-            // value of {} means path has sub object
-            let prefix = _.isEqual(diff.cur, {}) ? "" : diff.cur + "\u0000";
-            let item = { _whoid: whoid, path: path, val_whoid: prefix + whoid };
-            client.put({ TableName: pathTable.TableName, Item: item }, cb);
-          },
-          (cb) => {
-            let item = {
-              _whoid: whoid,
-              path_time: path + ".\u0000" + now.getTime(),
-              path: path,
-              date: now.toString(),
-            };
-            item = _.assign(item, diff);
-
-            client.put({ TableName: histTable.TableName, Item: item }, cb);
-          },
-        );
+      callbacks.push(cb => {
+        client.send(new PutCommand({ TableName: objTable.TableName, Item: cur }))
+          .then(() => cb(null))
+          .catch(err => cb(err));
       });
 
-      // TODO look into making all these writes atomic
+      Object.keys(diffs).forEach(path => {
+        const diff = diffs[path];
+
+        callbacks.push(cb => {
+          if (diff.created) return cb(null);
+          const prefix = _.isEqual(diff.prev, {}) ? "" : diff.prev + "\u0000";
+          const key = { path: path, val_whoid: prefix + whoid };
+          client.send(new DeleteCommand({ TableName: pathTable.TableName, Key: key }))
+            .then(() => cb(null))
+            .catch(err => cb(err));
+        });
+
+        callbacks.push(cb => {
+          if (diff.deleted) return cb(null);
+          const prefix = _.isEqual(diff.cur, {}) ? "" : diff.cur + "\u0000";
+          const item = { _whoid: whoid, path: path, val_whoid: prefix + whoid };
+          client.send(new PutCommand({ TableName: pathTable.TableName, Item: item }))
+            .then(() => cb(null))
+            .catch(err => cb(err));
+        });
+
+        callbacks.push(cb => {
+          let item = {
+            _whoid: whoid,
+            path_time: path + ".\u0000" + now.getTime(),
+            path: path,
+            date: now.toString(),
+          };
+          item = _.assign(item, diff);
+          client.send(new PutCommand({ TableName: histTable.TableName, Item: item }))
+            .then(() => cb(null))
+            .catch(err => cb(err));
+        });
+      });
+
       async.parallel(callbacks, (err) => {
-        if (err) {
-          return cb(err);
-        }
-
+        if (err) return cb(err);
         cb(null, cur);
       });
     },
