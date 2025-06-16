@@ -10,7 +10,7 @@ let port = process.env.PORT || "80";
 let endpoint = process.env.AWS_DYNAMO_ENDPOINT || "https://dynamodb.us-west-1.amazonaws.com/";
 let region = process.env.AWS_DYNAMO_REGION || "us-west-1";
 let tableNameSuffix = process.env.TABLE_NAME_SUFFIX;
-let dynamoReadWriteCapacity = parseInt(process.env.DYNAMO_READ_WRITE_CAPACITY);
+let dynamoReadWriteCapacity = parseInt(process.env.DYNAMO_READ_WRITE_CAPACITY, 10) || 5;
 
 const storage = require("./storage/dynamodb")(
   endpoint,
