@@ -21,6 +21,10 @@ fi
 java -jar "$jar" -sharedDb -inMemory -port 8002 &
 sleep 2
 
+export AWS_ACCESS_KEY_ID=fake
+export AWS_SECRET_ACCESS_KEY=fake
+export AWS_REGION=us-west-1
+export AWS_DYNAMO_REGION=us-west-1
 export AWS_DYNAMO_ENDPOINT=http://localhost:8002
 
 # run our tests
