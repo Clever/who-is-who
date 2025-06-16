@@ -1,5 +1,9 @@
 // storage/dynamodb.js
-const { DynamoDBClient, DescribeTableCommand, CreateTableCommand } = require("@aws-sdk/client-dynamodb");
+const {
+  DynamoDBClient,
+  DescribeTableCommand,
+  CreateTableCommand,
+} = require("@aws-sdk/client-dynamodb");
 const {
   DynamoDBDocumentClient,
   GetCommand,
@@ -67,7 +71,7 @@ function checkSchema(expected, actual) {
         "\nexpected:\n" +
         JSON.stringify(expected, null, 4) +
         "\nactual:\n" +
-        JSON.stringify(minactual, null, 4)
+        JSON.stringify(minactual, null, 4),
     );
   }
 }
@@ -101,12 +105,12 @@ function createTablesIfNeeded(endpoint, region, cb) {
       (cb) => createTableIfNeeded(dynamodb, pathTable, cb),
       (cb) => createTableIfNeeded(dynamodb, histTable, cb),
     ],
-    cb
+    cb,
   );
 }
 
 // once tables exist, build the working API
-function createWorkingExport(endpoint, region, /*credentials ignored*/) {
+function createWorkingExport(endpoint, region /*credentials ignored*/) {
   const rawClient = new DynamoDBClient({ endpoint, region });
   const client = DynamoDBDocumentClient.from(rawClient);
 
@@ -183,7 +187,7 @@ function createWorkingExport(endpoint, region, /*credentials ignored*/) {
         client
           .send(new PutCommand({ TableName: objTable.TableName, Item: cur }))
           .then(() => cb(null))
-          .catch((err) => cb(err))
+          .catch((err) => cb(err)),
       );
 
       // handle diffs for paths & history
@@ -237,12 +241,7 @@ function createWorkingExport(endpoint, region, /*credentials ignored*/) {
 }
 
 // entrypoint: export a “loading” wrapper until tables exist
-module.exports = function (
-  endpoint,
-  region,
-  tableNameSuffix,
-  readWriteCapacity
-) {
+module.exports = function (endpoint, region, tableNameSuffix, readWriteCapacity) {
   // apply suffix to table names & throughput
   objTable.TableName += tableNameSuffix || "";
   pathTable.TableName += tableNameSuffix || "";
