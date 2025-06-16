@@ -163,7 +163,6 @@ function createWorkingExport(endpoint, region /*credentials ignored*/) {
         ExpressionAttributeValues: { ":whoid": whoid },
       };
 
-      
       if (path) {
         params.KeyConditionExpression += " and begins_with(path_time, :path)";
         // match the "\u0000" separator you used in put(): path + "\u0000" + timestamp
