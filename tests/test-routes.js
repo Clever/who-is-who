@@ -6,7 +6,7 @@ const mocks = require("node-mocks-http");
 const async = require("async");
 
 let endpoint = process.env.AWS_DYNAMO_ENDPOINT;
-let storage = require("../storage/dynamodb")(endpoint, "us-west-1", "test", "test", "test", 1);
+let storage = require("../storage/dynamodb")(endpoint, "us-west-1", "test", 1);
 
 const db = require("../db")(storage);
 const router = require("../router")(db);
