@@ -16,6 +16,8 @@ expose:
       type: http
       path: /health
 team: eng-security
+access_groups:
+  - everyone
 aws:
   dynamodb:
     read:
