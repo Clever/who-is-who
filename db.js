@@ -174,7 +174,7 @@ module.exports = function (storage) {
           return this.put(author, "email", body["email"], body, cb);
         }
 
-        let prev = obj || { _whoid: uuid() };
+        let prev = obj || { _whoid: uuid.v4() };
         let cur = _.defaultsDeep({}, body, prev);
         cur = removeEmptyValues(cur); // Don't save empty values
 
