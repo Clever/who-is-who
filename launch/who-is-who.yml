@@ -36,6 +36,7 @@ alarms:
 pod_config:
   group: us-west-2 # same region as its DynamoDBs
 deploy_config:
+  blockDevDeploys: true
   canaryInProd: false
   autoDeployEnvs:
     - clever-dev
