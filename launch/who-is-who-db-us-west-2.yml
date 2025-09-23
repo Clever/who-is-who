@@ -1,0 +1,87 @@
+type: dynamodb
+application: who-is-who
+team: eng-security
+dev:
+  regions:
+    - us-west-2
+  tables:
+    Objects:
+      AttributeDefinitions:
+        - AttributeName: "_whoid"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "_whoid"
+          KeyType: "HASH"
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: false
+    Paths:
+      AttributeDefinitions:
+        - AttributeName: "path"
+          AttributeType: "S"
+        - AttributeName: "val_whoid"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "path"
+          KeyType: "HASH"
+        - AttributeName: "val_whoid"
+          KeyType: "RANGE"
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: false
+    History:
+      AttributeDefinitions:
+        - AttributeName: "_whoid"
+          AttributeType: "S"
+        - AttributeName: "path_time"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "_whoid"
+          KeyType: "HASH"
+        - AttributeName: "path_time"
+          KeyType: "RANGE"
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: false
+      BillingMode: PAY_PER_REQUEST
+prod:
+  regions:
+    - us-west-2
+  tables:
+    Objects:
+      AttributeDefinitions:
+        - AttributeName: "_whoid"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "_whoid"
+          KeyType: "HASH"
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+    Paths:
+      AttributeDefinitions:
+        - AttributeName: "path"
+          AttributeType: "S"
+        - AttributeName: "val_whoid"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "path"
+          KeyType: "HASH"
+        - AttributeName: "val_whoid"
+          KeyType: "RANGE"
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+    History:
+      AttributeDefinitions:
+        - AttributeName: "_whoid"
+          AttributeType: "S"
+        - AttributeName: "path_time"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "_whoid"
+          KeyType: "HASH"
+        - AttributeName: "path_time"
+          KeyType: "RANGE"
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
