@@ -20,13 +20,13 @@ const log = new kv.logger("who-is-who");
 
 // table definitions
 const objTable = {
-  TableName: "whoswho-objects",
+  TableName: "Objects",
   AttributeDefinitions: [{ AttributeName: "_whoid", AttributeType: "S" }],
   KeySchema: [{ AttributeName: "_whoid", KeyType: "HASH" }],
   ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 },
 };
 const pathTable = {
-  TableName: "whoswho-paths",
+  TableName: "Paths",
   AttributeDefinitions: [
     { AttributeName: "path", AttributeType: "S" },
     { AttributeName: "val_whoid", AttributeType: "S" },
@@ -38,7 +38,7 @@ const pathTable = {
   ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 },
 };
 const histTable = {
-  TableName: "whoswho-history",
+  TableName: "History",
   AttributeDefinitions: [
     { AttributeName: "_whoid", AttributeType: "S" },
     { AttributeName: "path_time", AttributeType: "S" },
@@ -76,37 +76,72 @@ function checkSchema(expected, actual) {
   }
 }
 
-// ensure a single table exists and matches schema
+// check if we're running in test environment
+function isTestEnvironment(endpoint) {
+  return endpoint && endpoint.includes("localhost:8002");
+}
+
+// create a single table if it doesn't exist (test environment only)
 function createTableIfNeeded(dynamodb, table, cb) {
   dynamodb
     .send(new DescribeTableCommand({ TableName: table.TableName }))
     .then((data) => cb(checkSchema(table, data.Table)))
     .catch((err) => {
       if (err.name === "ResourceNotFoundException") {
-        log.warn("creating table " + table.TableName);
+        // only create tables in test environment
         dynamodb
           .send(new CreateTableCommand(table))
-          .then(() => cb(null))
-          .catch(cb);
+          .then(() => {
+            log.info(`Created table ${table.TableName}`);
+            cb(null);
+          })
+          .catch((createErr) => cb(createErr));
       } else {
         cb(err);
       }
     });
 }
 
-// create all three tables in parallel
-function createTablesIfNeeded(endpoint, region, cb) {
+// validate that a table exists and matches schema
+function validateTable(dynamodb, table, cb) {
+  dynamodb
+    .send(new DescribeTableCommand({ TableName: table.TableName }))
+    .then((data) => cb(checkSchema(table, data.Table)))
+    .catch((err) => {
+      if (err.name === "ResourceNotFoundException") {
+        cb(new Error(`Table ${table.TableName} does not exist`));
+      } else {
+        cb(err);
+      }
+    });
+}
+
+// ensure tables exist and are valid (create in test, validate in prod)
+function ensureTables(endpoint, region, cb) {
   // default credential chain will pick up AWS_ACCESS_KEY_ID, SECRET, TOKEN, or profile
   const dynamodb = new DynamoDBClient({ endpoint, region });
 
-  async.parallel(
-    [
-      (cb) => createTableIfNeeded(dynamodb, objTable, cb),
-      (cb) => createTableIfNeeded(dynamodb, pathTable, cb),
-      (cb) => createTableIfNeeded(dynamodb, histTable, cb),
-    ],
-    cb,
-  );
+  if (isTestEnvironment(endpoint)) {
+    // in test environment, create tables if they don't exist
+    async.parallel(
+      [
+        (cb) => createTableIfNeeded(dynamodb, objTable, cb),
+        (cb) => createTableIfNeeded(dynamodb, pathTable, cb),
+        (cb) => createTableIfNeeded(dynamodb, histTable, cb),
+      ],
+      cb,
+    );
+  } else {
+    // in production, only validate existing tables
+    async.parallel(
+      [
+        (cb) => validateTable(dynamodb, objTable, cb),
+        (cb) => validateTable(dynamodb, pathTable, cb),
+        (cb) => validateTable(dynamodb, histTable, cb),
+      ],
+      cb,
+    );
+  }
 }
 
 // once tables exist, build the working API
@@ -241,7 +276,7 @@ function createWorkingExport(endpoint, region /*credentials ignored*/) {
   };
 }
 
-// entrypoint: export a “loading” wrapper until tables exist
+// entrypoint: export a "loading" wrapper until tables are ready (created in test, validated in prod)
 module.exports = function (endpoint, region, tableNameSuffix, readWriteCapacity) {
   // apply suffix to table names & throughput
   objTable.TableName += tableNameSuffix || "";
@@ -259,9 +294,9 @@ module.exports = function (endpoint, region, tableNameSuffix, readWriteCapacity)
   histTable.ProvisionedThroughput = { ...objTable.ProvisionedThroughput };
 
   let pending = [];
-  let waitForCreate = (thunk) => pending.push(thunk);
+  let waitForValidate = (thunk) => pending.push(thunk);
 
-  createTablesIfNeeded(endpoint, region, (err) => {
+  ensureTables(endpoint, region, (err) => {
     if (err) throw err;
 
     const working = createWorkingExport(endpoint, region, null, null);
@@ -271,7 +306,7 @@ module.exports = function (endpoint, region, tableNameSuffix, readWriteCapacity)
     log.info("dynamo db ready");
 
     // drain pending calls
-    waitForCreate = null;
+    waitForValidate = null;
     pending.forEach((th) => th());
     pending = null;
   });
@@ -279,19 +314,19 @@ module.exports = function (endpoint, region, tableNameSuffix, readWriteCapacity)
   // wrapper until tables are ready
   let loading = {
     all(cb) {
-      waitForCreate(() => loading.all(cb));
+      waitForValidate(() => loading.all(cb));
     },
     has(key, cb) {
-      waitForCreate(() => loading.has(key, cb));
+      waitForValidate(() => loading.has(key, cb));
     },
     by(key, val, cb) {
-      waitForCreate(() => loading.by(key, val, cb));
+      waitForValidate(() => loading.by(key, val, cb));
     },
     history(whoid, path, cb) {
-      waitForCreate(() => loading.history(whoid, path, cb));
+      waitForValidate(() => loading.history(whoid, path, cb));
     },
     put(cur, diffs, cb) {
-      waitForCreate(() => loading.put(cur, diffs, cb));
+      waitForValidate(() => loading.put(cur, diffs, cb));
     },
   };
 

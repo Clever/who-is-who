@@ -21,13 +21,9 @@ access_groups:
 aws:
   dynamodb:
     read:
-      - whoswho-paths
-      - whoswho-objects
-      - whoswho-history
+      - dynamodb:us-west-2:{env}--who-is-who-db-us-west-2
     write:
-      - whoswho-paths
-      - whoswho-objects
-      - whoswho-history
+      - dynamodb:us-west-2:{env}--who-is-who-db-us-west-2
 alarms:
   - type: InternalErrorAlarm
     severity: major
