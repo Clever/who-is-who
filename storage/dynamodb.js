@@ -20,13 +20,13 @@ const log = new kv.logger("who-is-who");
 
 // table definitions
 const objTable = {
-  TableName: "Objects",
+  TableName: `${process.env._DEPLOY_ENV}--who-is-who-db-us-west-2-Objects`,
   AttributeDefinitions: [{ AttributeName: "_whoid", AttributeType: "S" }],
   KeySchema: [{ AttributeName: "_whoid", KeyType: "HASH" }],
   ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 },
 };
 const pathTable = {
-  TableName: "Paths",
+  TableName: `${process.env._DEPLOY_ENV}--who-is-who-db-us-west-2-Paths`,
   AttributeDefinitions: [
     { AttributeName: "path", AttributeType: "S" },
     { AttributeName: "val_whoid", AttributeType: "S" },
@@ -38,7 +38,7 @@ const pathTable = {
   ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 },
 };
 const histTable = {
-  TableName: "History",
+  TableName: `${process.env._DEPLOY_ENV}--who-is-who-db-us-west-2-History`,
   AttributeDefinitions: [
     { AttributeName: "_whoid", AttributeType: "S" },
     { AttributeName: "path_time", AttributeType: "S" },
