@@ -11,8 +11,8 @@ const SCOPES = ["https://www.googleapis.com/auth/admin.directory.user"];
 const TOKEN_DIR = ".";
 const TOKEN_PATH = "token.json";
 
-let endpoint = "https://dynamodb.us-west-1.amazonaws.com/";
-let region = "us-west-1";
+let endpoint = "https://dynamodb.us-west-2.amazonaws.com/";
+let region = "us-west-2";
 let accessKeyId = process.env.AWS_ACCESS_KEY_ID;
 let secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
 
