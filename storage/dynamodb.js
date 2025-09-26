@@ -277,11 +277,10 @@ function createWorkingExport(endpoint, region /*credentials ignored*/) {
 }
 
 // entrypoint: export a "loading" wrapper until tables are ready (created in test, validated in prod)
-module.exports = function (endpoint, region, tableNameSuffix, readWriteCapacity) {
-  // apply suffix to table names & throughput
-  objTable.TableName += tableNameSuffix || "";
-  pathTable.TableName += tableNameSuffix || "";
-  histTable.TableName += tableNameSuffix || "";
+module.exports = function (endpoint, region, readWriteCapacity) {
+  objTable.TableName || "";
+  pathTable.TableName || "";
+  histTable.TableName || "";
 
   if (!Number.isInteger(readWriteCapacity)) {
     throw "Invalid dynamo read/write capacity: " + readWriteCapacity;
