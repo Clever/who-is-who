@@ -22,9 +22,13 @@ access_groups:
 aws:
   dynamodb:
     read:
-      - dynamodb:us-west-2:{env}--who-is-who-db-us-west-2
+      - dynamodb:us-west-2:{env}--who-is-who-db-us-west-2-Paths
+      - dynamodb:us-west-2:{env}--who-is-who-db-us-west-2-History
+      - dynamodb:us-west-2:{env}--who-is-who-db-us-west-2-Objects
     write:
-      - dynamodb:us-west-2:{env}--who-is-who-db-us-west-2
+      - dynamodb:us-west-2:{env}--who-is-who-db-us-west-2-Paths
+      - dynamodb:us-west-2:{env}--who-is-who-db-us-west-2-History
+      - dynamodb:us-west-2:{env}--who-is-who-db-us-west-2-Objects
 alarms:
   - type: InternalErrorAlarm
     severity: major
