@@ -19,16 +19,10 @@ expose:
 team: eng-security
 access_groups:
   - everyone
-aws:
-  dynamodb:
-    read:
-      - dynamodb:us-west-2:{env}--who-is-who-db-us-west-2-Paths
-      - dynamodb:us-west-2:{env}--who-is-who-db-us-west-2-History
-      - dynamodb:us-west-2:{env}--who-is-who-db-us-west-2-Objects
-    write:
-      - dynamodb:us-west-2:{env}--who-is-who-db-us-west-2-Paths
-      - dynamodb:us-west-2:{env}--who-is-who-db-us-west-2-History
-      - dynamodb:us-west-2:{env}--who-is-who-db-us-west-2-Objects
+databases:
+  - dynamodb:us-west-2:{env}--who-is-who-db-us-west-2-Objects
+  - dynamodb:us-west-2:{env}--who-is-who-db-us-west-2-Paths
+  - dynamodb:us-west-2:{env}--who-is-who-db-us-west-2-History
 alarms:
   - type: InternalErrorAlarm
     severity: major
