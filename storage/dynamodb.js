@@ -81,24 +81,11 @@ function isTestEnvironment(endpoint) {
   return endpoint && endpoint.includes("localhost:8002");
 }
 
-// utility to ensure callback is only called once
-function onceCallback(cb) {
-  let called = false;
-  return (err, result) => {
-    if (!called) {
-      called = true;
-      cb(err, result);
-    }
-  };
-}
-
 // create a single table if it doesn't exist (test environment only)
 function createTableIfNeeded(dynamodb, table, cb) {
-  const done = onceCallback(cb);
-
   dynamodb
     .send(new DescribeTableCommand({ TableName: table.TableName }))
-    .then((data) => done(checkSchema(table, data.Table)))
+    .then((data) => cb(checkSchema(table, data.Table)))
     .catch((err) => {
       if (err.name === "ResourceNotFoundException") {
         // only create tables in test environment
@@ -106,27 +93,25 @@ function createTableIfNeeded(dynamodb, table, cb) {
           .send(new CreateTableCommand(table))
           .then(() => {
             log.info(`Created table ${table.TableName}`);
-            done(null);
+            cb(null);
           })
-          .catch((createErr) => done(createErr));
+          .catch((createErr) => cb(createErr));
       } else {
-        done(err);
+        cb(err);
       }
     });
 }
 
 // validate that a table exists and matches schema
 function validateTable(dynamodb, table, cb) {
-  const done = onceCallback(cb);
-
   dynamodb
     .send(new DescribeTableCommand({ TableName: table.TableName }))
-    .then((data) => done(checkSchema(table, data.Table)))
+    .then((data) => cb(checkSchema(table, data.Table)))
     .catch((err) => {
       if (err.name === "ResourceNotFoundException") {
-        done(new Error(`Table ${table.TableName} does not exist`));
+        cb(new Error(`Table ${table.TableName} does not exist`));
       } else {
-        done(err);
+        cb(err);
       }
     });
 }
