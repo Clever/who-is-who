@@ -4,7 +4,6 @@ env:
   - PORT
   - AWS_DYNAMO_ENDPOINT
   - AWS_DYNAMO_REGION
-  - TABLE_NAME_SUFFIX
   - DYNAMO_TABLE_PREFIX
 resources:
   cpu: 0.5
