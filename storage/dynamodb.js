@@ -23,7 +23,6 @@ const objTable = {
   TableName: `${process.env.DYNAMO_TABLE_PREFIX}-Objects`,
   AttributeDefinitions: [{ AttributeName: "_whoid", AttributeType: "S" }],
   KeySchema: [{ AttributeName: "_whoid", KeyType: "HASH" }],
-  ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 },
 };
 const pathTable = {
   TableName: `${process.env.DYNAMO_TABLE_PREFIX}-Paths`,
@@ -35,7 +34,6 @@ const pathTable = {
     { AttributeName: "path", KeyType: "HASH" },
     { AttributeName: "val_whoid", KeyType: "RANGE" },
   ],
-  ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 },
 };
 const histTable = {
   TableName: `${process.env.DYNAMO_TABLE_PREFIX}-History`,
@@ -47,7 +45,6 @@ const histTable = {
     { AttributeName: "_whoid", KeyType: "HASH" },
     { AttributeName: "path_time", KeyType: "RANGE" },
   ],
-  ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 },
 };
 
 // compare expected vs actual schema
@@ -56,10 +53,6 @@ function checkSchema(expected, actual) {
     TableName: actual.TableName,
     AttributeDefinitions: _.sortBy(actual.AttributeDefinitions, "AttributeName"),
     KeySchema: _.sortBy(actual.KeySchema, "AttributeName"),
-    ProvisionedThroughput: {
-      ReadCapacityUnits: actual.ProvisionedThroughput.ReadCapacityUnits,
-      WriteCapacityUnits: actual.ProvisionedThroughput.WriteCapacityUnits,
-    },
   };
 
   if (_.isEqual(expected, minactual)) {
@@ -273,20 +266,10 @@ function createWorkingExport(endpoint, region /*credentials ignored*/) {
 }
 
 // entrypoint: export a "loading" wrapper until tables are ready (created in test, validated in prod)
-module.exports = function (endpoint, region, readWriteCapacity) {
+module.exports = function (endpoint, region) {
   objTable.TableName || "";
   pathTable.TableName || "";
   histTable.TableName || "";
-
-  if (!Number.isInteger(readWriteCapacity)) {
-    throw "Invalid dynamo read/write capacity: " + readWriteCapacity;
-  }
-  objTable.ProvisionedThroughput = {
-    ReadCapacityUnits: readWriteCapacity,
-    WriteCapacityUnits: readWriteCapacity,
-  };
-  pathTable.ProvisionedThroughput = { ...objTable.ProvisionedThroughput };
-  histTable.ProvisionedThroughput = { ...objTable.ProvisionedThroughput };
 
   let pending = [];
   let waitForValidate = (thunk) => pending.push(thunk);
