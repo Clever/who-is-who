@@ -81,9 +81,15 @@ function createTableIfNeeded(dynamodb, table, cb) {
     .then((data) => cb(checkSchema(table, data.Table)))
     .catch((err) => {
       if (err.name === "ResourceNotFoundException") {
-        // only create tables in test environment
+        // when testing locally, dynamodb requires provisioned
+        // throughput. move the definition to exclusively during testing.
         dynamodb
-          .send(new CreateTableCommand(table))
+          .send(
+            new CreateTableCommand({
+              ...table,
+              ProvisionedThroughput: { ReadCapacityUnits: 1, WriteCapacityUnits: 1 },
+            }),
+          )
           .then(() => {
             log.info(`Created table ${table.TableName}`);
             cb(null);
