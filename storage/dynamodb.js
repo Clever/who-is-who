@@ -97,7 +97,7 @@ function createTableIfNeeded(dynamodb, table, cb) {
           })
           .catch((createErr) => cb(createErr));
       } else {
-        cb(err);
+        throw err;
       }
     });
 }
@@ -108,11 +108,7 @@ function validateTable(dynamodb, table, cb) {
     .send(new DescribeTableCommand({ TableName: table.TableName }))
     .then((data) => cb(checkSchema(table, data.Table)))
     .catch((err) => {
-      if (err.name === "ResourceNotFoundException") {
-        cb(new Error(`Table ${table.TableName} does not exist`));
-      } else {
-        cb(err);
-      }
+      throw err;
     });
 }
 
